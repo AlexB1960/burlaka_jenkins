@@ -1,0 +1,17 @@
+- name: Run tests
+  hosts: localhost
+  connection: local
+  become: yes
+  tasks:
+    - name: Run tests
+      ignore_errors: true
+      community.docker.docker_container:
+        name: "bruno_tests-api"
+        image: "bruno_tests:1.1"
+        state: started
+        network_mode: host
+        mounts:
+          - type: bind
+            source: "/var/run/docker.sock"
+            target: "/var/run/docker.sock"
+        detach: false
