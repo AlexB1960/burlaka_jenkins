@@ -24,7 +24,7 @@ timeout(120) {
              stage("Running bruno-tests") {
                  //sh "pwd"
                  //sh "ls -la"
-                 ansiblePlaybook playbook: "playbook.yml", //плейбука, которая запускает тесты
+                 ansiblePlaybook playbook: "playbook.yml" //плейбука, которая запускает тесты
              }
              
          } finally {
