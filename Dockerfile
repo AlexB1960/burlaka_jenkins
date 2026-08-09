@@ -2,7 +2,8 @@ FROM eclipse-temurin:21-jdk
 
 USER root
 
-RUN apt install docker.io -y
+RUN apt update -y && apt install -y docker.io ansible
+RUN ansible-galaxy collection install community.docker
 
 FROM usebruno/cli:latest
 
