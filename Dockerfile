@@ -1,8 +1,10 @@
-FROM usebruno/cli:latest
+FROM eclipse-temurin:21-jdk
 
 USER root
 
 RUN apt install docker.io -y
+
+FROM usebruno/cli:latest
 
 WORKDIR /bruno
 COPY . .
