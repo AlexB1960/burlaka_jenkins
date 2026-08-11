@@ -7,7 +7,9 @@ RUN ansible-galaxy collection install community.docker
 
 FROM usebruno/cli:latest
 
-WORKDIR /bruno
+# WORKDIR /bruno
 COPY . .
+CMD ["pwd"]
+CMD ["ls", "-la"]
 
 ENTRYPOINT ["sh", "-c", "docker run --rm -v $(pwd):/bruno -w /bruno usebruno/cli:latest run"]
