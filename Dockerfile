@@ -1,13 +1,17 @@
 FROM node:18-alpine
 
-# В alpine нет curl по умолчанию — ставим его
+# 1. Ставим curl и bash (нужны для скрипта установки)
 RUN apk add --no-cache curl bash
 
-# Устанавливаем Bruno CLI через официальный скрипт
-# Скрипт сам поставит bru в /usr/local/bin (или аналог), что будет в PATH
+# 2. Устанавливаем Bruno CLI
+# Скрипт сам скачает бинарь и положит его в /usr/local/bin (или аналогичную системную папку)
 RUN curl -fsSL https://raw.githubusercontent.com/usebruno/bruno-cli/main/install.sh | sh
+
+# 3. КРИТИЧЕСКИ ВАЖНО: Добавляем папку с bru в PATH навсегда для этого образа
+# Обычно bru лежит в /usr/local/bin. Если нет - проверь логи сборки.
+ENV PATH="/usr/local/bin:${PATH}"
 
 WORKDIR /workspace
 
-# По умолчанию ничего не запускаем — мы будем передавать команду в docker run
+# Теперь команда "bru" будет видна в любой новой оболочке
 CMD ["bru", "run", "collection.yml"]
