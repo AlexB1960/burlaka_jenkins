@@ -1,0 +1,33 @@
+info:
+  name: Create Release
+  type: http
+  seq: 8
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/releases"
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "service": "e58ac01a-606b-4cf7-9dee-cb4484672fa1",
+        "version": "1.0.0",
+        "changelog": "Initial release"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: "let json = res.getBody();\r
+
+        bru.setEnvVar('releaseId', json.data.id);"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
