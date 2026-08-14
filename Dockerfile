@@ -8,3 +8,5 @@ RUN curl -fsSL https://raw.githubusercontent.com/usebruno/bruno-cli/main/install
 ENV PATH="/usr/local/bin:${PATH}"
 
 WORKDIR /workspace
+
+CMD ["docker", "run", "--rm   -v "$(pwd):/workspace"   -w /workspace   usebruno/cli:4.0.0   run"]
