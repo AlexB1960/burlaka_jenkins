@@ -9,4 +9,4 @@ ENV PATH="/usr/local/bin:${PATH}"
 
 WORKDIR /workspace
 
-CMD ["docker", "run", "--rm   -v "$(pwd):/workspace"   -w /workspace   usebruno/cli:4.0.0   run"]
+CMD ["bru", "run", "--rm   -v "$(pwd):/workspace"   -w /workspace   usebruno/cli:4.0.0   run"]
