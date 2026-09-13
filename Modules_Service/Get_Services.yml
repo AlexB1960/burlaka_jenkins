@@ -1,0 +1,31 @@
+info:
+  name: Get Services
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: http://modules.dev.practic.ordocrm.online/api/v1/services?page=0&size=20&type=ALL&sortBy=code&direction=asc
+  params:
+    - name: page
+      value: "0"
+      type: query
+    - name: size
+      value: "20"
+      type: query
+    - name: type
+      value: ALL
+      type: query
+    - name: sortBy
+      value: code
+      type: query
+    - name: direction
+      value: asc
+      type: query
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
