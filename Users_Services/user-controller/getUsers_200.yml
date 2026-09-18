@@ -1,5 +1,5 @@
 info:
-  name: getUsers
+  name: getUsers_200
   type: http
   seq: 5
   tags:
@@ -16,6 +16,18 @@ http:
       value: "10"
       type: query
   auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("Status cod = 200", function () {
+            expect(res.getStatus()).to.equal(200);
+        });
+
+        test("Status = OK", function () {
+            expect(res.res.statusText).to.equal("OK");
+        });
 
 settings:
   encodeUrl: true

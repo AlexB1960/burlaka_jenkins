@@ -1,5 +1,5 @@
 info:
-  name: getUserById
+  name: getUserById_200
   type: http
   seq: 2
   tags:
@@ -13,6 +13,18 @@ http:
       value: 858e865d-ec1b-4837-8af2-62c6240df417
       type: path
   auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("Status cod = 200", function () {
+            expect(res.getStatus()).to.equal(200);
+        });
+
+        test("Status = OK", function () {
+            expect(res.res.statusText).to.equal("OK");
+        });
 
 settings:
   encodeUrl: true

@@ -1,5 +1,5 @@
 info:
-  name: deleteUser
+  name: deleteUser_200
   type: http
   seq: 3
   tags:
@@ -10,9 +10,24 @@ http:
   url: "{{baseUrl}}/api/user/:id"
   params:
     - name: id
-      value: ""
+      value: "{{userId}}"
       type: path
   auth: inherit
+
+runtime:
+  variables:
+    - name: userId
+      value: ""
+  scripts:
+    - type: tests
+      code: |-
+        test("Status cod = 200", function () {
+            expect(res.getStatus()).to.equal(200);
+        });
+
+        test("Status = OK", function () {
+            expect(res.res.statusText).to.equal("OK");
+        });
 
 settings:
   encodeUrl: true

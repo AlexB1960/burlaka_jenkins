@@ -1,5 +1,5 @@
 info:
-  name: register
+  name: registerUser_200
   type: http
   seq: 1
   tags:
@@ -13,17 +13,32 @@ http:
     data: |-
       {
         "user": {
-          "login": "",
-          "password": "",
-          "email": "",
+          "login": "TestLogin",
+          "password": "TestPassword",
+          "email": "TestEmail",
           "fio": {
-            "firstName": "",
-            "lastName": "",
-            "secondName": ""
+            "firstName": "TestName",
+            "lastName": "TestLastname",
+            "secondName": "TestSecondname"
           }
         }
       }
   auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        test("Status cod = 200", function () {
+            expect(res.getStatus()).to.equal(200);
+        });
+
+        test("Status = OK", function () {
+            expect(res.res.statusText).to.equal("OK");
+        });
+
+        const userId = res.body.id;
+        bru.setVar("testUserID", userId);
 
 settings:
   encodeUrl: true
