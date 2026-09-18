@@ -1,0 +1,127 @@
+info:
+  name: readAll
+  type: http
+  seq: 1
+  tags:
+    - service-controller
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/v1/services"
+  headers:
+    - name: requestID
+      value: ""
+      disabled: true
+  params:
+    - name: page
+      value: "0"
+      type: query
+    - name: size
+      value: "20"
+      type: query
+    - name: type
+      value: ALL
+      type: query
+    - name: sortBy
+      value: code
+      type: query
+    - name: direction
+      value: asc
+      type: query
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: 200 Response
+    description: OK
+    request:
+      url: "{{baseUrl}}/api/v1/services"
+      method: GET
+      headers:
+        - name: requestID
+          value: ""
+          disabled: true
+      params:
+        - name: page
+          value: "0"
+          type: query
+        - name: size
+          value: "20"
+          type: query
+        - name: type
+          value: ALL
+          type: query
+        - name: sortBy
+          value: code
+          type: query
+        - name: direction
+          value: asc
+          type: query
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: "*/*"
+      body:
+        type: text
+        data: |-
+          {
+            "message": "",
+            "status": "SUCCESS",
+            "data": {
+              "totalElements": 0,
+              "totalPages": 0,
+              "numberOfElements": 0,
+              "pageable": {
+                "pageNumber": 0,
+                "unpaged": false,
+                "paged": false,
+                "pageSize": 0,
+                "offset": 0,
+                "sort": [
+                  {
+                    "direction": "",
+                    "nullHandling": "",
+                    "ascending": false,
+                    "property": "",
+                    "ignoreCase": false
+                  }
+                ]
+              },
+              "size": 0,
+              "content": [
+                {
+                  "serviceId": "",
+                  "releaseId": "",
+                  "releasedAt": "",
+                  "major": 0,
+                  "minor": 0,
+                  "build": 0,
+                  "changelog": "",
+                  "code": "",
+                  "name": "",
+                  "type": ""
+                }
+              ],
+              "number": 0,
+              "sort": [
+                {
+                  "direction": "",
+                  "nullHandling": "",
+                  "ascending": false,
+                  "property": "",
+                  "ignoreCase": false
+                }
+              ],
+              "first": false,
+              "last": false,
+              "empty": false
+            }
+          }
