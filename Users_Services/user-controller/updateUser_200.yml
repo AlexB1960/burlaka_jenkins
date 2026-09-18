@@ -1,17 +1,32 @@
 info:
-  name: deleteUser_200
+  name: updateUser_200
   type: http
-  seq: 3
+  seq: 4
   tags:
     - user-controller
 
 http:
-  method: DELETE
+  method: PATCH
   url: "{{baseUrl}}/api/user/:id"
   params:
     - name: id
-      value: "{{userId}}"
+      value: 858e865d-ec1b-4837-8af2-62c6240df417
       type: path
+  body:
+    type: json
+    data: |-
+      {
+        "user": {
+          "login": "",
+          "password": "",
+          "email": "",
+          "fio": {
+            "firstName": "ChangedFirstName",
+            "lastName": "",
+            "secondName": ""
+          }
+        }
+      }
   auth: inherit
 
 runtime:
@@ -20,6 +35,11 @@ runtime:
       code: |-
         test("Status cod = 200", function () {
             expect(res.getStatus()).to.equal(200);
+        });
+
+        test("Field firstName = ChangedFirstName", function () {
+            const body = res.getBody();
+            expect(body.payload.user.fio.firstName).to.equal("ChangedFirstName");
         });
 
 settings:
@@ -34,11 +54,26 @@ examples:
     description: OK
     request:
       url: "{{baseUrl}}/api/user/:id"
-      method: DELETE
+      method: PATCH
       params:
         - name: id
           value: ""
           type: path
+      body:
+        type: json
+        data: |-
+          {
+            "user": {
+              "login": "",
+              "password": "",
+              "email": "",
+              "fio": {
+                "firstName": "",
+                "lastName": "",
+                "secondName": ""
+              }
+            }
+          }
     response:
       status: 200
       statusText: OK

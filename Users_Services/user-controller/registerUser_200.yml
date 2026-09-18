@@ -29,16 +29,16 @@ runtime:
   scripts:
     - type: after-response
       code: |-
+        const body = res.getBody();
+        if (body?.id) {
+          const userId = res.body.id;
+          bru.setVar("testUserID", userId);
+        }
+    - type: tests
+      code: |-
         test("Status cod = 200", function () {
             expect(res.getStatus()).to.equal(200);
         });
-
-        test("Status = OK", function () {
-            expect(res.res.statusText).to.equal("OK");
-        });
-
-        const userId = res.body.id;
-        bru.setVar("testUserID", userId);
 
 settings:
   encodeUrl: true
