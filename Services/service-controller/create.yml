@@ -1,0 +1,83 @@
+info:
+  name: create
+  type: http
+  seq: 4
+  tags:
+    - service-controller
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/services"
+  headers:
+    - name: requestID
+      value: ""
+      disabled: true
+  body:
+    type: json
+    data: |-
+      {
+        "type": "SYSTEM",
+        "code": "",
+        "name": ""
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: 200 Response
+    description: OK
+    request:
+      url: "{{baseUrl}}/api/v1/services"
+      method: POST
+      headers:
+        - name: requestID
+          value: ""
+          disabled: true
+      body:
+        type: json
+        data: |-
+          {
+            "type": "SYSTEM",
+            "code": "",
+            "name": ""
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: "*/*"
+      body:
+        type: text
+        data: |-
+          {
+            "message": "",
+            "status": "SUCCESS",
+            "data": {
+              "id": "",
+              "type": "SYSTEM",
+              "code": "",
+              "name": "",
+              "releases": [
+                {
+                  "id": "",
+                  "major": 0,
+                  "minor": 0,
+                  "build": 0,
+                  "changelog": "",
+                  "releasedAt": "",
+                  "createdAt": "",
+                  "updatedAt": "",
+                  "version": ""
+                }
+              ],
+              "createdAt": "",
+              "updatedAt": ""
+            }
+          }

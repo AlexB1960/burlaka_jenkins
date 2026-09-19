@@ -1,0 +1,73 @@
+info:
+  name: createRelease
+  type: http
+  seq: 2
+  tags:
+    - service-release-controller
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/releases"
+  headers:
+    - name: requestID
+      value: ""
+      disabled: true
+  body:
+    type: json
+    data: |-
+      {
+        "service": "",
+        "changelog": "",
+        "version": ""
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: 200 Response
+    description: OK
+    request:
+      url: "{{baseUrl}}/api/v1/releases"
+      method: POST
+      headers:
+        - name: requestID
+          value: ""
+          disabled: true
+      body:
+        type: json
+        data: |-
+          {
+            "service": "",
+            "changelog": "",
+            "version": ""
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: "*/*"
+      body:
+        type: text
+        data: |-
+          {
+            "message": "",
+            "status": "SUCCESS",
+            "data": {
+              "id": "",
+              "major": 0,
+              "minor": 0,
+              "build": 0,
+              "changelog": "",
+              "releasedAt": "",
+              "createdAt": "",
+              "updatedAt": "",
+              "version": ""
+            }
+          }
