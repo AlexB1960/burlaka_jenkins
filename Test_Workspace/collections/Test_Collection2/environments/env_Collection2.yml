@@ -1,0 +1,5 @@
+name: env_Collection2
+variables:
+  - name: baseUrl
+    value: http://users.dev.practic.ordocrm.online
+    description: ""
