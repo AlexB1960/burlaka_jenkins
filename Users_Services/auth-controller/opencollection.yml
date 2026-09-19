@@ -1,7 +1,7 @@
 opencollection: 1.0.0
 
 info:
-  name: Users_Services
+  name: auth-controller
 config:
   proxy:
     inherit: true

@@ -1,7 +1,7 @@
 opencollection: 1.0.0
 
 info:
-  name: Modules_Services
+  name: service-release-controller
 config:
   proxy:
     inherit: true
