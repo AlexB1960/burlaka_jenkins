@@ -1,6 +1,0 @@
-info:
-  name: service-controller
-  type: folder
-
-request:
-  auth: inherit

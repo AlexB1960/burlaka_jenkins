@@ -1,6 +1,0 @@
-info:
-  name: service-release-controller
-  type: folder
-
-request:
-  auth: inherit
