@@ -16,7 +16,7 @@ config:
 
 request:
   variables:
-    - name: base_Url
+    - name: baseUrl
       value: http://modules.dev.practic.ordocrm.online
 bundled: false
 extensions:
