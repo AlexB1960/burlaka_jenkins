@@ -19,7 +19,7 @@ http:
         "user": {
           "login": "",
           "password": "",
-          "email": "",
+          "email": null,
           "fio": {
             "firstName": "ChangedFirstName",
             "lastName": "",

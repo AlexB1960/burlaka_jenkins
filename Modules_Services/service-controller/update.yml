@@ -1,7 +1,7 @@
 info:
   name: update
   type: http
-  seq: 1
+  seq: 2
   tags:
     - service-controller
 

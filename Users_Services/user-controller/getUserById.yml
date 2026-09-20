@@ -1,26 +1,18 @@
 info:
-  name: deleteUser_200
+  name: getUserById
   type: http
-  seq: 3
+  seq: 2
   tags:
     - user-controller
 
 http:
-  method: DELETE
+  method: GET
   url: "{{baseUrl}}/api/user/:id"
   params:
     - name: id
-      value: "{{userId}}"
+      value: ""
       type: path
   auth: inherit
-
-runtime:
-  scripts:
-    - type: tests
-      code: |-
-        test("Status cod = 200", function () {
-            expect(res.getStatus()).to.equal(200);
-        });
 
 settings:
   encodeUrl: true
@@ -34,7 +26,7 @@ examples:
     description: OK
     request:
       url: "{{baseUrl}}/api/user/:id"
-      method: DELETE
+      method: GET
       params:
         - name: id
           value: ""

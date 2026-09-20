@@ -1,7 +1,7 @@
 info:
   name: readByCode
   type: http
-  seq: 1
+  seq: 5
   tags:
     - service-controller
 

@@ -1,7 +1,7 @@
 info:
   name: createRelease
   type: http
-  seq: 1
+  seq: 2
   tags:
     - service-release-controller
 

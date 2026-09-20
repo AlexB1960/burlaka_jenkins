@@ -1,0 +1,5 @@
+name: stage
+variables:
+  - name: baseUrl
+    value: https://modules.dev.practic.ordocrm.online
+    description: ""

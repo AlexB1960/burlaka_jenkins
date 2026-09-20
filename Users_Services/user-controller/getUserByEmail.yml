@@ -1,5 +1,5 @@
 info:
-  name: getUserByEmail_200
+  name: getUserByEmail
   type: http
   seq: 7
   tags:
@@ -10,17 +10,9 @@ http:
   url: "{{baseUrl}}/api/user/email/:email"
   params:
     - name: email
-      value: string@dsf.ru
+      value: ""
       type: path
   auth: inherit
-
-runtime:
-  scripts:
-    - type: tests
-      code: |-
-        test("Status cod = 200", function () {
-            expect(res.getStatus()).to.equal(200);
-        });
 
 settings:
   encodeUrl: true

@@ -1,7 +1,7 @@
 opencollection: 1.0.0
 
 info:
-  name: service-controller
+  name: Users_Services
 config:
   proxy:
     inherit: true
@@ -13,11 +13,6 @@ config:
         username: ""
         password: ""
       bypassProxy: ""
-
-request:
-  variables:
-    - name: baseUrl
-      value: http://modules.dev.practic.ordocrm.online
 bundled: false
 extensions:
   bruno:
