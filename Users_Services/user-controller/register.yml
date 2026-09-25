@@ -13,13 +13,13 @@ http:
     data: |-
       {
         "user": {
-          "login": "qweqw",
-          "password": "qweq",
-          "email": "qwe@mail.ru",
+          "login": "1qweqw",
+          "password": "1qweq",
+          "email": "1qwe@mail.ru",
           "fio": {
-            "firstName": "zsdfadsa",
-            "lastName": "465h",
-            "secondName": "sdjhfg"
+            "firstName": "1zsdfadsa",
+            "lastName": "1465h",
+            "secondName": "1sdjhfg"
           }
         }
       }

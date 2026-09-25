@@ -1,7 +1,7 @@
 info:
   name: updateUser_200
   type: http
-  seq: 4
+  seq: 5
   tags:
     - user-controller
 
@@ -10,7 +10,7 @@ http:
   url: "{{baseUrl}}/api/user/:id"
   params:
     - name: id
-      value: 858e865d-ec1b-4837-8af2-62c6240df417
+      value: "{{testUserId}}"
       type: path
   body:
     type: json
@@ -22,8 +22,8 @@ http:
           "email": null,
           "fio": {
             "firstName": "ChangedFirstName",
-            "lastName": "",
-            "secondName": ""
+            "lastName": "ChangedLastName",
+            "secondName": "ChangedSecondtName"
           }
         }
       }
@@ -31,15 +31,86 @@ http:
 
 runtime:
   scripts:
+    - type: before-request
+      code: |-
+        // Получаем ID и baseUrl из переменных окружения коллекции
+        const baseURL = bru.getEnvVar('baseUrl');
+        const userId = bru.getEnvVar('testUserId');
+
+        // 1. Сначала удаляем старого, если он есть
+        if (userId) {
+          try {
+            const deleteRes = await bru.sendRequest({
+              method: 'DELETE',
+              url: `${baseURL}/api/user/${userId}`,
+              headers: { 'Content-Type': 'application/json' },
+              timeout: 5000
+            });
+            if ([200, 204].includes(deleteRes.status)) {
+              console.log(`✅ Удалён старый пользователь: ${userId}`);
+            } else {
+              console.warn(`⚠️ Статус удаления: ${deleteRes.status}`);
+            }
+          } catch (e) {
+            console.warn('⚠️ Ошибка удаления (возможно, пользователь уже удалён):', e.message);
+          }
+        }
+
+        // 2. Генерируем данные для нового
+        const suffix = Math.random().toString(36).substring(2, 8);
+        const userData = {
+          "user": {
+            "login": "testLogin_" + suffix,
+            "password": "testPassword_" + suffix,
+            "email": "test_" + suffix + "@mail.ru",
+            "fio": {
+              "firstName": "testName",
+              "lastName": "testLastname",
+              "secondName": "testSecondname"
+            }
+          }
+        };
+
+        // 3. Создаём нового
+        const resNew = await bru.sendRequest({
+          method: 'POST',
+          url: `${baseURL}/api/user/register`,
+          headers: { 'Content-Type': 'application/json' },
+          data: userData,
+          timeout: 10000
+        });
+
+        if (resNew.status === 201) {
+          const newId = resNew.data.payload?.user?.id || res.data.id;
+          if (!newId) throw new Error('Не удалось извлечь ID из ответа');
+          
+          bru.setEnvVar('testUserId', newId);
+          console.log(`✅ Создан новый пользователь. ID: ${newId}`);
+        } else {
+          throw new Error(`Ошибка создания пользователя: статус ${resNew.status}`);
+        }
     - type: tests
       code: |-
         test("Status cod = 200", function () {
-            expect(res.getStatus()).to.equal(200);
+          expect(res.getStatus()).to.equal(200);
         });
 
-        test("Field firstName = ChangedFirstName", function () {
+        test("Status text = OK", function () {
             const body = res.getBody();
-            expect(body.payload.user.fio.firstName).to.equal("ChangedFirstName");
+            expect(body.status).to.equal("OK");
+        });
+
+        const fio = res.body.payload.user.fio;
+        test("Field firstName = ChangedFirstName", function () {
+          expect(fio.firstName).to.equal("ChangedFirstName");
+        });
+
+        test("Field lastName = ChangedLastName", function () {
+          expect(fio.lastName).to.equal("ChangedLastName");
+        });
+
+        test("Field secondName = ChangedSecondtName", function () {
+          expect(fio.secondName).to.equal("ChangedSecondtName");
         });
 
 settings:

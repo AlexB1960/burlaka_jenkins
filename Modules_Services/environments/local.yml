@@ -3,3 +3,6 @@ variables:
   - name: baseUrl
     value: http://127.0.0.1:8081/
     description: ""
+  - name: testUserId
+    value: ""
+    description: ""

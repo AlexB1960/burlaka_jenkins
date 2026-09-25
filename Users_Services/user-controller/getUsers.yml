@@ -1,19 +1,19 @@
 info:
   name: getUsers
   type: http
-  seq: 5
+  seq: 6
   tags:
     - user-controller
 
 http:
   method: GET
-  url: "{{baseUrl}}/api/user"
+  url: "{{baseUrl}}/api/user?page=1&size=30"
   params:
     - name: page
       value: "1"
       type: query
     - name: size
-      value: "10"
+      value: "30"
       type: query
   auth: inherit
 

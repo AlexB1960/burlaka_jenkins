@@ -1,28 +1,115 @@
 info:
   name: getUsers_200
   type: http
-  seq: 5
+  seq: 7
   tags:
     - user-controller
 
 http:
   method: GET
-  url: "{{baseUrl}}/api/user"
+  url: "{{baseUrl}}/api/user?page=1&size=30"
   params:
     - name: page
       value: "1"
       type: query
     - name: size
-      value: "10"
+      value: "30"
       type: query
   auth: inherit
 
 runtime:
   scripts:
+    - type: before-request
+      code: |-
+        //const currentID = bru.getVar("testUserId");
+        //const currentID = bru.vars.testUserId;
+        //const currentID = bru.vars['testUserId'];
+
+        //console.log('bru.getEnvVar("testUserId"):', bru.getEnvVar('testUserId'));
+        //console.log('bru.vars:', bru.vars);
+        //console.log('bru.getVar("testUserId"):', bru.getVar('testUserId'));
+
+        //console.log('User created:', currentID);
+    - type: after-response
+      code: |-
+        //const body = res.getBody();
+        //bru.setVar('testUserId', body.payload.users[0].id);
+        //const currentID = bru.getVar('testUserId');
+        //console.log('User created:', currentID);
+
+        //console.log('User ID :', body.payload.users[0].id);
     - type: tests
       code: |-
         test("Status cod = 200", function () {
             expect(res.getStatus()).to.equal(200);
+        });
+
+        test("Status text = OK", function () {
+            const body = res.getBody();
+            expect(body.status).to.equal("OK");
+        });
+
+        test("All users in list have valid and non-empty fields", function () {
+          const users = res.body.payload.users;
+
+          if (!Array.isArray(users)) {
+            throw new Error("❌ В ответе нет списка пользователей (поле 'users' не является массивом).");
+          }
+
+          if (users.length === 0) {
+            console.warn("⚠️ Список пользователей пуст. Пропускаем проверку полей.");
+            return;
+          }
+
+          console.log(`🔍 Начинаем проверку полей для ${users.length} пользователей...`);
+
+          // Регулярки (общепринятые для таких проверок в тестах)
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          const loginRegex = /^[a-zA-Z0-9_]{3,30}$/; // буквы, цифры, подчёркивание, длина 3–30
+
+          users.forEach((user, index) => {
+            const fio = user.fio;
+
+            // --- FIO ---
+            if (!fio) {
+              throw new Error(`❌ Пользователь [${index}]: отсутствует объект fio.`);
+            }
+            if (!fio.firstName || fio.firstName.trim() === "") {
+              throw new Error(`❌ Пользователь [${index}]: поле firstName пустое.`);
+            }
+            if (!fio.lastName || fio.lastName.trim() === "") {
+              throw new Error(`❌ Пользователь [${index}]: поле lastName пустое.`);
+            }
+            if (!fio.secondName || fio.secondName.trim() === "") {
+              throw new Error(`❌ Пользователь [${index}]: поле secondName пустое.`);
+            }
+
+            // --- Login ---
+            const login = user.login;
+            if (typeof login !== "string" || login.trim() === "") {
+              throw new Error(`❌ Пользователь [${index}]: поле login отсутствует или пустое.`);
+            }
+            if (!loginRegex.test(login)) {
+              throw new Error(
+                `❌ Пользователь [${index}]: некорректный формат login '${login}'. Ожидается [a-zA-Z0-9_], длина 3–30.`
+              );
+            }
+
+            // --- Email ---
+            const email = user.email;
+            if (typeof email !== "string" || email.trim() === "") {
+              throw new Error(`❌ Пользователь [${index}]: поле email отсутствует или пустое.`);
+            }
+            if (!emailRegex.test(email)) {
+              throw new Error(
+                `❌ Пользователь [${index}]: некорректный формат email '${email}'.`
+              );
+            }
+
+            console.log(`✅ Пользователь [${index}] проверен: FIO, login, email — OK.`);
+          });
+
+          console.log('✅ Все пользователи в списке прошли проверку полей!');
         });
 
 settings:
