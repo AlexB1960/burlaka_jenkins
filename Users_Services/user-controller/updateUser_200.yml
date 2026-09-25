@@ -89,6 +89,40 @@ runtime:
         } else {
           throw new Error(`Ошибка создания пользователя: статус ${resNew.status}`);
         }
+    - type: after-response
+      code: |-
+        const baseURL = bru.getEnvVar('baseUrl');
+        const userId = bru.getEnvVar('testUserId');
+
+        if (!userId) {
+          console.log('⚠️ Post-response: testUserId не найден. Возможно, Pre-request не отработал.');
+          return; // Не ломаем тест, если что-то пошло не так на старте
+        }
+
+        console.log(`🗑️ Post-response: Удаляем тестового пользователя ID: ${userId}...`);
+
+        try {
+          const deleteRes = await bru.sendRequest({
+            method: 'DELETE',
+            url: `${baseURL}/api/user/${userId}`,
+            headers: { 'Content-Type': 'application/json' },
+            timeout: 5000
+          });
+
+          if ([200, 204].includes(deleteRes.status)) {
+            console.log(`✅ Пользователь ${userId} успешно удален.`);
+            // Опционально: сбрасываем переменную, чтобы не было путаницы
+            bru.setEnvVar('testUserId', null);
+          } else if (deleteRes.status === 404) {
+            console.warn(`⚠️ Пользователь ${userId} уже не найден (возможно, удален ранее).`);
+          } else {
+            console.warn(`⚠️ Сервер вернул статус ${deleteRes.status} при удалении.`);
+          }
+        } catch (err) {
+          console.error(`💥 Критическая ошибка при удалении: ${err.message}`);
+          // Мы НЕ делаем throw здесь, чтобы не ломать основной тест из-за проблем с очисткой.
+          // Но в логах Jenkins это будет видно.
+        }
     - type: tests
       code: |-
         test("Status cod = 200", function () {

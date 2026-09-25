@@ -106,7 +106,7 @@ runtime:
               );
             }
 
-            console.log(`✅ Пользователь [${index}] проверен: FIO, login, email — OK.`);
+            //console.log(`✅ Пользователь [${index}] проверен: FIO, login, email — OK.`);
           });
 
           console.log('✅ Все пользователи в списке прошли проверку полей!');
