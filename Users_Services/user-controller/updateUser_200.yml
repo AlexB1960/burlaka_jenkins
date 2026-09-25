@@ -46,13 +46,13 @@ runtime:
               headers: { 'Content-Type': 'application/json' },
               timeout: 5000
             });
-            if ([200, 204].includes(deleteRes.status)) {
-              console.log(`✅ Удалён старый пользователь: ${userId}`);
+            if ([200, 204, 404].includes(deleteRes.status)) {
+              console.log(`✅ Старый пользователь удален или уже отсутствовал.`);
             } else {
               console.warn(`⚠️ Статус удаления: ${deleteRes.status}`);
             }
           } catch (e) {
-            console.warn('⚠️ Ошибка удаления (возможно, пользователь уже удалён):', e.message);
+            console.warn('⚠️ Ошибка при попытке очистки перед тестом (игнорируем):', e.message);
           }
         }
 
