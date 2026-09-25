@@ -3,6 +3,3 @@ variables:
   - name: baseUrl
     value: https://modules.dev.practic.ordocrm.online
     description: ""
-  - name: testUserId
-    value: ""
-    description: ""

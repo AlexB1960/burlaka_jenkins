@@ -30,31 +30,16 @@ http:
   auth: inherit
 
 runtime:
+  variables:
+    - name: testUserId
+      value: ""
   scripts:
     - type: before-request
       code: |-
         // Получаем ID и baseUrl из переменных окружения коллекции
         const baseURL = bru.getEnvVar('baseUrl');
-        const userId = bru.getEnvVar('testUserId');
+        //const userId = bru.getEnvVar('testUserId');
 
-        // 1. Сначала удаляем старого, если он есть
-        if (userId) {
-          try {
-            const deleteRes = await bru.sendRequest({
-              method: 'DELETE',
-              url: `${baseURL}/api/user/${userId}`,
-              headers: { 'Content-Type': 'application/json' },
-              timeout: 5000
-            });
-            if ([200, 204, 404].includes(deleteRes.status)) {
-              console.log(`✅ Старый пользователь удален или уже отсутствовал.`);
-            } else {
-              console.warn(`⚠️ Статус удаления: ${deleteRes.status}`);
-            }
-          } catch (e) {
-            console.warn('⚠️ Ошибка при попытке очистки перед тестом (игнорируем):', e.message);
-          }
-        }
 
         // 2. Генерируем данные для нового
         const suffix = Math.random().toString(36).substring(2, 8);
@@ -84,7 +69,7 @@ runtime:
           const newId = resNew.data.payload?.user?.id || res.data.id;
           if (!newId) throw new Error('Не удалось извлечь ID из ответа');
           
-          bru.setEnvVar('testUserId', newId);
+          bru.setVar('testUserId', newId);
           console.log(`✅ Создан новый пользователь. ID: ${newId}`);
         } else {
           throw new Error(`Ошибка создания пользователя: статус ${resNew.status}`);
@@ -92,7 +77,7 @@ runtime:
     - type: after-response
       code: |-
         const baseURL = bru.getEnvVar('baseUrl');
-        const userId = bru.getEnvVar('testUserId');
+        const userId = bru.getVar('testUserId');
 
         if (!userId) {
           console.log('⚠️ Post-response: testUserId не найден. Возможно, Pre-request не отработал.');
