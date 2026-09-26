@@ -2,5 +2,4 @@ name: dev
 variables:
   - name: baseUrl
     value: https://users.dev.practic.ordocrm.online
-  - name: testUserId
-    value: ""
+    description: ""

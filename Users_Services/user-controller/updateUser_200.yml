@@ -66,7 +66,7 @@ runtime:
         });
 
         if (resNew.status === 201) {
-          const newId = resNew.data.payload?.user?.id || res.data.id;
+          const newId = resNew.data?.payload?.user?.id || resNew.data?.id || resNew.body?.payload?.user?.id;
           if (!newId) throw new Error('Не удалось извлечь ID из ответа');
           
           bru.setVar('testUserId', newId);
@@ -97,9 +97,9 @@ runtime:
           if ([200, 204].includes(deleteRes.status)) {
             console.log(`✅ Пользователь ${userId} успешно удален.`);
             // Опционально: сбрасываем переменную, чтобы не было путаницы
-            bru.setEnvVar('testUserId', null);
+            bru.setVar('testUserId', null);
           } else if (deleteRes.status === 404) {
-            console.warn(`⚠️ Пользователь ${userId} уже не найден (возможно, удален ранее).`);
+            console.warn(`⚠️ Пользователь ${userId} не найден (возможно, уже удален ранее).`);
           } else {
             console.warn(`⚠️ Сервер вернул статус ${deleteRes.status} при удалении.`);
           }
