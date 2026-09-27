@@ -1,7 +1,7 @@
 info:
-  name: updateUser_200
+  name: updateUser_405
   type: http
-  seq: 5
+  seq: 7
   tags:
     - user-controller
 
@@ -19,11 +19,11 @@ http:
         "user": {
           "login": "",
           "password": "",
-          "email": null,
+          "email": "ty",
           "fio": {
-            "firstName": "ChangedFirstName",
-            "lastName": "ChangedLastName",
-            "secondName": "ChangedSecondtName"
+            "firstName": "",
+            "lastName": "",
+            "secondName": ""
           }
         }
       }
@@ -122,16 +122,16 @@ runtime:
         });
 
         const fio = res.body.payload.user.fio;
-        test("Field firstName = ChangedFirstName", function () {
-          expect(fio.firstName).to.equal("ChangedFirstName");
+        test("Field firstName = empty", function () {
+          expect(fio.firstName).to.equal("");
         });
 
-        test("Field lastName = ChangedLastName", function () {
-          expect(fio.lastName).to.equal("ChangedLastName");
+        test("Field lastName = empty", function () {
+          expect(fio.lastName).to.equal("");
         });
 
-        test("Field secondName = ChangedSecondtName", function () {
-          expect(fio.secondName).to.equal("ChangedSecondtName");
+        test("Field secondName = empty", function () {
+          expect(fio.secondName).to.equal("");
         });
 
 settings:

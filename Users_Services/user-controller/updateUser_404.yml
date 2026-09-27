@@ -1,0 +1,101 @@
+info:
+  name: updateUser_404
+  type: http
+  seq: 6
+  tags:
+    - user-controller
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/user/:id"
+  params:
+    - name: id
+      value: 72d0e057-2aec-4762-93ee-3d98e08523ef
+      type: path
+  body:
+    type: json
+    data: |-
+      {
+        "user": {
+          "login": "",
+          "password": "",
+          "email": null,
+          "fio": {
+            "firstName": "ChangedFirstName",
+            "lastName": "ChangedLastName",
+            "secondName": "ChangedSecondtName"
+          }
+        }
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("Status cod = 404", function () {
+          expect(res.getStatus()).to.equal(404);
+        });
+
+        test("Status text = NOT_FOUND", function () {
+            const body = res.getBody();
+            expect(body.status).to.equal("NOT_FOUND");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: 200 Response
+    description: OK
+    request:
+      url: "{{baseUrl}}/api/user/:id"
+      method: PATCH
+      params:
+        - name: id
+          value: ""
+          type: path
+      body:
+        type: json
+        data: |-
+          {
+            "user": {
+              "login": "",
+              "password": "",
+              "email": "",
+              "fio": {
+                "firstName": "",
+                "lastName": "",
+                "secondName": ""
+              }
+            }
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: "*/*"
+      body:
+        type: text
+        data: |-
+          {
+            "message": "",
+            "status": "OK",
+            "payload": {
+              "user": {
+                "id": "",
+                "login": "",
+                "email": "",
+                "fio": {
+                  "firstName": "",
+                  "lastName": "",
+                  "secondName": ""
+                }
+              }
+            }
+          }

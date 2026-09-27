@@ -1,0 +1,101 @@
+info:
+  name: updateUser_500
+  type: http
+  seq: 8
+  tags:
+    - user-controller
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/user/:id"
+  params:
+    - name: id
+      value: Not-Exists-Test-User-Id
+      type: path
+  body:
+    type: json
+    data: |-
+      {
+        "user": {
+          "login": "",
+          "password": "",
+          "email": null,
+          "fio": {
+            "firstName": "ChangedFirstName",
+            "lastName": "ChangedLastName",
+            "secondName": "ChangedSecondtName"
+          }
+        }
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("Status cod = 500", function () {
+          expect(res.getStatus()).to.equal(500);
+        });
+
+        test("Status text = INTERNAL_SERVER_ERROR", function () {
+            const body = res.getBody();
+            expect(body.status).to.equal("INTERNAL_SERVER_ERROR");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: 200 Response
+    description: OK
+    request:
+      url: "{{baseUrl}}/api/user/:id"
+      method: PATCH
+      params:
+        - name: id
+          value: ""
+          type: path
+      body:
+        type: json
+        data: |-
+          {
+            "user": {
+              "login": "",
+              "password": "",
+              "email": "",
+              "fio": {
+                "firstName": "",
+                "lastName": "",
+                "secondName": ""
+              }
+            }
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: "*/*"
+      body:
+        type: text
+        data: |-
+          {
+            "message": "",
+            "status": "OK",
+            "payload": {
+              "user": {
+                "id": "",
+                "login": "",
+                "email": "",
+                "fio": {
+                  "firstName": "",
+                  "lastName": "",
+                  "secondName": ""
+                }
+              }
+            }
+          }
