@@ -1,0 +1,141 @@
+info:
+  name: getUsers_200_all
+  type: http
+  seq: 11
+  tags:
+    - user-controller
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/user?page=1&size=30"
+  params:
+    - name: page
+      value: "1"
+      type: query
+    - name: size
+      value: "30"
+      type: query
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        //На базе - Мои временные тесты:
+        test("Status cod = 200", function () {
+            expect(res.getStatus()).to.equal(200);
+        });
+
+        test("Status text = OK", function () {
+            const body = res.getBody();
+            expect(body.status).to.equal("OK");
+        });
+
+        // Проверки login и email с регулярками. Проверка полей ФИО на непустые значения.
+          const users = res.body.payload.users;
+
+          if (!Array.isArray(users)) {
+            throw new Error("❌ В ответе нет списка пользователей (поле 'users' не является массивом).");
+          }
+
+          if (users.length === 0) {
+            console.warn("⚠️ Список пользователей пуст. Пропускаем проверку полей.");
+            return;
+          } else {
+            console.log(`🔍 Начинаем проверку полей для ${users.length} пользователей...`);
+
+          // Регулярки (общепринятые для таких проверок в тестах)
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          const loginRegex = /^[a-zA-Z0-9_]{3,30}$/; // буквы, цифры, подчёркивание, длина 3–30
+
+          users.forEach((user, index) => {
+            const fio = user.fio;
+
+            // --- FIO ---
+            if (!fio) {
+              throw new Error(`❌ Пользователь [${index}]: отсутствует объект fio.`);
+            }
+            test(`Пользователь [${index}]: поле firstName не пустое.`, function () {
+              expect(fio.firstName.trim()).not.to.equal("");
+            });
+            test(`Пользователь [${index}]: поле lastName не пустое.`, function () {
+              expect(fio.lastName.trim()).not.to.equal("");
+            });
+            test(`Пользователь [${index}]: поле secondName не пустое.`, function () {
+              expect(fio.secondName.trim()).not.to.equal("");
+            });
+            
+            // --- Login ---
+            const login = user.login.trim();
+            test(`Пользователь [${index}]: поле login присутствует и не пустое.`, function () {
+              expect(login).not.to.be.empty;
+            });
+            test(`Пользователь [${index}]: корректный формат login '${login}'. Ожидается [a-zA-Z0-9_], длина 3–30.`, function () {
+              expect(loginRegex.test(login)).to.be.true;
+            });
+
+            // --- Email ---
+            const email = user.email.trim();
+            test(`Пользователь [${index}]: поле email присутствует и не пустое.`, function () {
+              expect(email).not.to.be.empty;
+            });
+            test(`Пользователь [${index}]: корректный формат email '${email}'.`, function () {
+              expect(emailRegex.test(email), `email '${email}' прошёл проверку`).to.equal(true);
+            });
+            
+            //console.log(`✅ Пользователь [${index}] проверен: FIO, login, email — OK.`);
+          });
+
+          //console.log('✅ Все пользователи в списке прошли проверку полей!');
+          }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: 200 Response
+    description: OK
+    request:
+      url: "{{baseUrl}}/api/user"
+      method: GET
+      params:
+        - name: page
+          value: "1"
+          type: query
+        - name: size
+          value: "10"
+          type: query
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: "*/*"
+      body:
+        type: text
+        data: |-
+          {
+            "message": "",
+            "status": "OK",
+            "payload": {
+              "page": 0,
+              "pageCount": 0,
+              "countOnPage": 0,
+              "users": [
+                {
+                  "id": "",
+                  "login": "",
+                  "email": "",
+                  "fio": {
+                    "firstName": "",
+                    "lastName": "",
+                    "secondName": ""
+                  }
+                }
+              ]
+            }
+          }
