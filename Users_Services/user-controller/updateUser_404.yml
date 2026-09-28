@@ -10,7 +10,7 @@ http:
   url: "{{baseUrl}}/api/user/:id"
   params:
     - name: id
-      value: 72d0e057-2aec-4762-93ee-3d98e08523ef
+      value: d052d4de-1918-45bf-816d-b2341fed8c6f
       type: path
   body:
     type: json
@@ -19,7 +19,7 @@ http:
         "user": {
           "login": "",
           "password": "",
-          "email": null,
+          "email": "",
           "fio": {
             "firstName": "ChangedFirstName",
             "lastName": "ChangedLastName",

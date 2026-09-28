@@ -3,3 +3,9 @@ variables:
   - name: baseUrl
     value: http://127.0.0.1:8081/
     description: ""
+  - name: regexLogin
+    value: ^[a-zA-Z0-9_]{3,30}$
+    description: Регулярка для login
+  - name: regexEmail
+    value: ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$
+    description: Регулярка для email

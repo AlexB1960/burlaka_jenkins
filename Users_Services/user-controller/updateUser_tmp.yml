@@ -1,5 +1,5 @@
 info:
-  name: updateUser_405
+  name: updateUser_tmp
   type: http
   seq: 7
   tags:
@@ -19,7 +19,7 @@ http:
         "user": {
           "login": "",
           "password": "",
-          "email": "ty",
+          "email": "",
           "fio": {
             "firstName": "",
             "lastName": "",
@@ -37,12 +37,8 @@ runtime:
     - type: before-request
       code: |-
         // Создание нового тестового пользователя
-        // 1. Получаем значение baseUrl из окружения коллекции
         const baseURL = bru.getEnvVar('baseUrl');
-        //const userId = bru.getEnvVar('testUserId');
 
-
-        // 2. Генерируем данные для нового тестового пользователя
         const suffix = Math.random().toString(36).substring(2, 8);
         const userData = {
           "user": {
@@ -57,7 +53,6 @@ runtime:
           }
         };
 
-        // 3. Создаём нового тестового пользователя и записываем его id в переменную testUserId
         const resNew = await bru.sendRequest({
           method: 'POST',
           url: `${baseURL}/api/user/register`,
@@ -68,25 +63,22 @@ runtime:
 
         if (resNew.status === 201) {
           const newId = resNew.data?.payload?.user?.id || resNew.data?.id || resNew.body?.payload?.user?.id;
-          if (!newId) throw new Error('Не удалось извлечь ID из ответа');
+          if (!newId) throw new Error('It was impossible to get ID from response');
           
           bru.setVar('testUserId', newId);
-          console.log(`✅ Создан новый пользователь. ID: ${newId}`);
         } else {
-          throw new Error(`Ошибка создания пользователя: статус ${resNew.status}`);
+          throw new Error(`Error creating user: status ${resNew.status}`);
         }
     - type: after-response
       code: |-
-        // Удаление тестового пользователя по записанному значению testUserId
+        // Удаление тестового пользователя
         const baseURL = bru.getEnvVar('baseUrl');
         const userId = bru.getVar('testUserId');
 
         if (!userId) {
-          console.log('⚠️ Post-response: testUserId не найден. Возможно, Pre-request не отработал.');
-          return; // Не ломаем тест, если что-то пошло не так на старте
+          console.log('⚠️ Post-response: testUserId is not found. Perhaps the Pre-request didn’t work.');
+          return;
         }
-
-        console.log(`🗑️ Post-response: Удаляем тестового пользователя ID: ${userId}...`);
 
         try {
           const deleteRes = await bru.sendRequest({
@@ -97,18 +89,14 @@ runtime:
           });
 
           if ([200, 204].includes(deleteRes.status)) {
-            console.log(`✅ Пользователь ${userId} успешно удален.`);
-            // Опционально: сбрасываем переменную, чтобы не было путаницы
             bru.setVar('testUserId', null);
           } else if (deleteRes.status === 404) {
-            console.warn(`⚠️ Пользователь ${userId} не найден (возможно, уже удален ранее).`);
+            console.warn(`⚠️ User ${userId} is not found (It may have been deleted earlier).`);
           } else {
-            console.warn(`⚠️ Сервер вернул статус ${deleteRes.status} при удалении.`);
+            console.warn(`⚠️ Server returns the status ${deleteRes.status} when removing.`);
           }
         } catch (err) {
-          console.error(`💥 Критическая ошибка при удалении: ${err.message}`);
-          // Мы НЕ делаем throw здесь, чтобы не ломать основной тест из-за проблем с очисткой.
-          // Но в логах Jenkins это будет видно.
+          console.error(`💥 Critical error during deletion: ${err.message}`);
         }
     - type: tests
       code: |-
@@ -117,8 +105,8 @@ runtime:
         });
 
         test("Status text = OK", function () {
-            const body = res.getBody();
-            expect(body.status).to.equal("OK");
+          const body = res.getBody();
+          expect(body.status).to.equal("OK");
         });
 
         const fio = res.body.payload.user.fio;
