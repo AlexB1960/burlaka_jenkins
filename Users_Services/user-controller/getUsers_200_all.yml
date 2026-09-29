@@ -1,7 +1,7 @@
 info:
   name: getUsers_200_all
   type: http
-  seq: 11
+  seq: 14
   tags:
     - user-controller
 
@@ -46,6 +46,7 @@ runtime:
 
           // Регулярки (общепринятые для таких проверок в тестах)
           const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          //const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
           const loginRegex = /^[a-zA-Z0-9_]{3,30}$/; // буквы, цифры, подчёркивание, длина 3–30
 
           users.forEach((user, index) => {
@@ -80,7 +81,7 @@ runtime:
               expect(email).not.to.be.empty;
             });
             test(`Пользователь [${index}]: корректный формат email '${email}'.`, function () {
-              expect(emailRegex.test(email), `email '${email}' прошёл проверку`).to.equal(true);
+              expect(emailRegex.test(email)).to.be.true;
             });
             
             //console.log(`✅ Пользователь [${index}] проверен: FIO, login, email — OK.`);

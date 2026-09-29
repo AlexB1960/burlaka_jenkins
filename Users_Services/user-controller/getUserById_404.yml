@@ -1,18 +1,31 @@
 info:
-  name: deleteUser
+  name: getUserById_404
   type: http
-  seq: 1
+  seq: 10
   tags:
     - user-controller
 
 http:
-  method: DELETE
+  method: GET
   url: "{{baseUrl}}/api/user/:id"
   params:
     - name: id
-      value: ""
+      value: d052d4de-1918-45bf-816d-b2341fed8c6f
       type: path
   auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("Status cod = 404", function () {
+          expect(res.getStatus()).to.equal(404);
+        });
+
+        test("Status text = NOT_FOUND", function () {
+            const body = res.getBody();
+            expect(body.status).to.equal("NOT_FOUND");
+        });
 
 settings:
   encodeUrl: true
@@ -26,7 +39,7 @@ examples:
     description: OK
     request:
       url: "{{baseUrl}}/api/user/:id"
-      method: DELETE
+      method: GET
       params:
         - name: id
           value: ""

@@ -1,7 +1,7 @@
 info:
   name: updateUser_500
   type: http
-  seq: 8
+  seq: 22
   tags:
     - user-controller
 

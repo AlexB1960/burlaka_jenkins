@@ -1,7 +1,7 @@
 info:
-  name: register
+  name: register_400_email
   type: http
-  seq: 23
+  seq: 25
   tags:
     - user-controller
 
@@ -13,17 +13,30 @@ http:
     data: |-
       {
         "user": {
-          "login": "",
-          "password": "",
-          "email": "",
+          "login": "testLogin",
+          "password": "testPassword",
+          "email": "ru",
           "fio": {
-            "firstName": "",
-            "lastName": "",
-            "secondName": ""
+            "firstName": "testName",
+            "lastName": "testLastName",
+            "secondName": "testSecondName"
           }
         }
       }
   auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("Status cod = 400", function () {
+          expect(res.getStatus()).to.equal(400);
+        });
+
+        test("Status text = BAD_REQUEST", function () {
+            const body = res.getBody();
+            expect(body.status).to.equal("BAD_REQUEST");
+        });
 
 settings:
   encodeUrl: true
