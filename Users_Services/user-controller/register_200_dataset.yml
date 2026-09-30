@@ -17,6 +17,9 @@ runtime:
   scripts:
     - type: before-request
       code: |-
+        const baseURL = bru.getEnvVar('baseUrl');
+
+        //Наборы тестовых данных
         const testData = [
           { login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich" },
           { login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Petr", lastName: "Petrov", secondName: "Petrovich" },
@@ -25,6 +28,7 @@ runtime:
 
         console.log(`🚀 Запуск ${testData.length} наборов тестовых данных...`);
 
+        //Рабочий цикл с тестовыми наборами : Создание тестового пользователя - Проверка получения кода статуса 201 - Удаление тестового пользователя
         for (let i = 0; i < testData.length; i++) {
           const data = testData[i];
           const suffix = Math.random().toString(36).substring(2, 8);
@@ -49,11 +53,11 @@ runtime:
 
           let userId;
 
-          // --- Создание ---
+          // --- Создание тестового пользователя---
           try {
             const res = await bru.sendRequest({
               method: 'POST',
-              url: 'https://users.dev.practic.ordocrm.online/api/user/register',
+              url: `${baseURL}/api/user/register`,
               headers: { 'Content-Type': 'application/json' },
               data: requestBody,
               timeout: 10000
@@ -68,16 +72,16 @@ runtime:
               throw new Error('Не удалось извлечь ID из ответа.');
             }
 
-            console.log(`✅ Набор данных ${i + 1}: пользователь создан, ID=${userId}`);
+            console.log(`✅ Набор данных ${i + 1}: пользователь создан (статус 201), ID=${userId}`);
           } catch (err) {
             throw new Error(`❌ Набор данных ${i + 1}: ошибка создания — ${err.message}`);
           }
 
-          // --- Удаление ---
+          // --- Удаление тестового пользователя---
           try {
             const delRes = await bru.sendRequest({
               method: 'DELETE',
-              url: `https://users.dev.practic.ordocrm.online/api/user/${userId}`,
+              url: `${baseURL}/api/user/${userId}`,
               headers: { 'Content-Type': 'application/json' },
               timeout: 5000
             });
