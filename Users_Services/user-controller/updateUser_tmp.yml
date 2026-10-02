@@ -10,7 +10,7 @@ http:
   url: "{{baseUrl}}/api/user/:id"
   params:
     - name: id
-      value: "{{testUserId}}"
+      value: "{{testUpdateUserId}}"
       type: path
   body:
     type: json
@@ -30,9 +30,6 @@ http:
   auth: inherit
 
 runtime:
-  variables:
-    - name: testUserId
-      value: ""
   scripts:
     - type: before-request
       code: |-
@@ -65,7 +62,7 @@ runtime:
           const newId = resNew.data?.payload?.user?.id || resNew.data?.id || resNew.body?.payload?.user?.id;
           if (!newId) throw new Error('It was impossible to get ID from response');
           
-          bru.setVar('testUserId', newId);
+          bru.setVar('testUpdateUserId', newId);
         } else {
           throw new Error(`Error creating user: status ${resNew.status}`);
         }
@@ -73,7 +70,7 @@ runtime:
       code: |-
         // Удаление тестового пользователя
         const baseURL = bru.getEnvVar('baseUrl');
-        const userId = bru.getVar('testUserId');
+        const userId = bru.getVar('testUpdateUserId');
 
         if (!userId) {
           console.log('⚠️ Post-response: testUserId is not found. Perhaps the Pre-request didn’t work.');
@@ -89,7 +86,8 @@ runtime:
           });
 
           if ([200, 204].includes(deleteRes.status)) {
-            bru.setVar('testUserId', null);
+            //bru.setVar('testUpdateUserId', null);
+            bru.deleteVar('testUpdateUserId');
           } else if (deleteRes.status === 404) {
             console.warn(`⚠️ User ${userId} is not found (It may have been deleted earlier).`);
           } else {

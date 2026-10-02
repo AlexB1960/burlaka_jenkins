@@ -15,11 +15,6 @@ http:
   auth: inherit
 
 runtime:
-  variables:
-    - name: testUserId
-      value: ""
-    - name: testUserLogin
-      value: ""
   scripts:
     - type: before-request
       code: |-
@@ -54,7 +49,7 @@ runtime:
           const newLogin = resNew.data?.payload?.user?.login || resNew.data?.login || resNew.body?.payload?.user?.login;
           if (!newLogin) throw new Error('It was impossible to get Login from response');
           
-          bru.setVar('testUserId', newId);
+          bru.setVar('testByLoginUserId', newId);
           bru.setVar('testUserLogin', newLogin);
         } else {
           throw new Error(`Error creating user: status ${resNew.status}`);
@@ -63,7 +58,7 @@ runtime:
       code: |-
         // Удаление тестового пользователя
         const baseURL = bru.getEnvVar('baseUrl');
-        const userId = bru.getVar('testUserId');
+        const userId = bru.getVar('testByLoginUserId');
 
         if (!userId) {
           console.log('⚠️ Post-response: testUserId is not found. Perhaps the Pre-request didn’t work.');
@@ -79,8 +74,10 @@ runtime:
           });
 
           if ([200, 204].includes(deleteRes.status)) {
-            bru.setVar('testUserId', null);
-            bru.setVar('testUserLogin', null);
+            //bru.setVar('testByLoginUserId', null);
+            //bru.setVar('testUserLogin', null);
+            bru.deleteVar('testByLoginUserId');
+            bru.deleteVar('testUserLogin');
           } else if (deleteRes.status === 404) {
             console.warn(`⚠️ User ${userId} is not found (It may have been deleted earlier).`);
           } else {

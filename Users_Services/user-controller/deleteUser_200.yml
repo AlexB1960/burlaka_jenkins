@@ -10,14 +10,11 @@ http:
   url: "{{baseUrl}}/api/user/:id"
   params:
     - name: id
-      value: "{{testUserId}}"
+      value: "{{testDeliteUserId}}"
       type: path
   auth: inherit
 
 runtime:
-  variables:
-    - name: testUserId
-      value: ""
   scripts:
     - type: before-request
       code: |-
@@ -50,10 +47,12 @@ runtime:
           const newId = resNew.data?.payload?.user?.id || resNew.data?.id || resNew.body?.payload?.user?.id;
           if (!newId) throw new Error('It was impossible to get ID from response');
           
-          bru.setVar('testUserId', newId);
+          bru.setVar('testDeliteUserId', newId);
         } else {
           throw new Error(`Error creating user: status ${resNew.status}`);
         }
+    - type: after-response
+      code: bru.deleteVar('testDeliteUserId');
     - type: tests
       code: |-
         test("Status cod = 200", function () {
