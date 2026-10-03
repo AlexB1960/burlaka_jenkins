@@ -36,7 +36,7 @@ runtime:
           const uniquePassword = data.password + "_" + suffix;
           const uniqueEmail = suffix + "_" + data.email;
 
-          console.log(`\n📦 Набор данных ${i + 1}/${testData.length}: login=${uniqueLogin}, email=${uniqueEmail}`);
+          console.log(`\n📦 Набор данных ${i + 1}/${testData.length}: login=${uniqueLogin}, email=${uniqueEmail}, firstName=${testData[i].firstName}, lastName=${testData[i].lastName}, secondName=${testData[i].secondName}`);
 
           const requestBody = {
             user: {

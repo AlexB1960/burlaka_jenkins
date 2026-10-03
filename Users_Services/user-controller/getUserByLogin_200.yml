@@ -54,8 +54,31 @@ runtime:
         } else {
           throw new Error(`Error creating user: status ${resNew.status}`);
         }
-    - type: after-response
+    - type: tests
       code: |-
+        test("Status cod = 200", function () {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("Status text = OK", function () {
+            const body = res.getBody();
+            expect(body.status).to.equal("OK");
+        });
+
+        const fio = res.body.payload.user.fio;
+        test("Field firstName = testName_ByLogin", function () {
+          expect(fio.firstName).to.equal("testName_ByLogin");
+        });
+
+        test("Field lastName = testLastname_ByLogin", function () {
+          expect(fio.lastName).to.equal("testLastname_ByLogin");
+        });
+
+        test("Field secondName = testSecondname_ByLogin", function () {
+          expect(fio.secondName).to.equal("testSecondname_ByLogin");
+        });
+
+
         // Удаление тестового пользователя
         const baseURL = bru.getEnvVar('baseUrl');
         const userId = bru.getVar('testByLoginUserId');
@@ -86,29 +109,6 @@ runtime:
         } catch (err) {
           console.error(`💥 Critical error during deletion: ${err.message}`);
         }
-    - type: tests
-      code: |-
-        test("Status cod = 200", function () {
-          expect(res.getStatus()).to.equal(200);
-        });
-
-        test("Status text = OK", function () {
-            const body = res.getBody();
-            expect(body.status).to.equal("OK");
-        });
-
-        const fio = res.body.payload.user.fio;
-        test("Field firstName = testName_ByLogin", function () {
-          expect(fio.firstName).to.equal("testName_ByLogin");
-        });
-
-        test("Field lastName = testLastname_ByLogin", function () {
-          expect(fio.lastName).to.equal("testLastname_ByLogin");
-        });
-
-        test("Field secondName = testSecondname_ByLogin", function () {
-          expect(fio.secondName).to.equal("testSecondname_ByLogin");
-        });
 
 settings:
   encodeUrl: true

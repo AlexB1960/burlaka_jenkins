@@ -66,38 +66,9 @@ runtime:
         } else {
           throw new Error(`Error creating user: status ${resNew.status}`);
         }
-    - type: after-response
-      code: |-
-        // Удаление тестового пользователя
-        const baseURL = bru.getEnvVar('baseUrl');
-        const userId = bru.getVar('testUpdateUserId');
-
-        if (!userId) {
-          console.log('⚠️ Post-response: testUserId is not found. Perhaps the Pre-request didn’t work.');
-          return;
-        }
-
-        try {
-          const deleteRes = await bru.sendRequest({
-            method: 'DELETE',
-            url: `${baseURL}/api/user/${userId}`,
-            headers: { 'Content-Type': 'application/json' },
-            timeout: 5000
-          });
-
-          if ([200, 204].includes(deleteRes.status)) {
-            //bru.setVar('testUpdateUserId', null);
-            bru.deleteVar('testUpdateUserId');
-          } else if (deleteRes.status === 404) {
-            console.warn(`⚠️ User ${userId} is not found (It may have been deleted earlier).`);
-          } else {
-            console.warn(`⚠️ Server returns the status ${deleteRes.status} when removing.`);
-          }
-        } catch (err) {
-          console.error(`💥 Critical error during deletion: ${err.message}`);
-        }
     - type: tests
       code: |-
+        // 1. Проверяем ответ UPDATE (res — в памяти, работает всегда)
         test("Status cod = 200", function () {
           expect(res.getStatus()).to.equal(200);
         });
@@ -108,17 +79,57 @@ runtime:
         });
 
         const fio = res.body.payload.user.fio;
-        test("Field firstName = ChangedFirstName", function () {
+        test("Response: Field firstName = ChangedFirstName", function () {
           expect(fio.firstName).to.equal("ChangedFirstName");
         });
 
-        test("Field lastName = ChangedLastName", function () {
+        test("Response: Field lastName = ChangedLastName", function () {
           expect(fio.lastName).to.equal("ChangedLastName");
         });
 
-        test("Field secondName = ChangedSecondtName", function () {
+        test("Response: Field secondName = ChangedSecondtName", function () {
           expect(fio.secondName).to.equal("ChangedSecondtName");
         });
+
+
+        // 2. (Опционально) Дополнительный GET для проверки в БД
+        const baseURL = bru.getEnvVar('baseUrl');
+        const userId = bru.getVar('testUpdateUserId');
+        try {
+          const checkRes = await bru.sendRequest({
+            method: 'GET',
+            url: `${baseURL}/api/user/${userId}`,
+            headers: { 'Content-Type': 'application/json' },
+            timeout: 5000
+          });
+
+          test('GET: Field firstName = ChangedFirstName', function() {
+            expect(checkRes.data.payload.user.fio.firstName).to.equal('ChangedFirstName');
+          });
+          test('GET: Field lastName = ChangedLastName', function() {
+            expect(checkRes.data.payload.user.fio.lastName).to.equal('ChangedLastName');
+          });
+          test('GET: Field secondName = ChangedSecondtName', function() {
+            expect(checkRes.data.payload.user.fio.secondName).to.equal('ChangedSecondtName');
+          });
+        } catch (err) {
+          console.error('GET-проверка не удалась:', err.message);
+        }
+
+        // 3. Очистка (Delete) — в самом конце, гарантированно
+        try {
+          await bru.sendRequest({
+            method: 'DELETE',
+            url: `${baseURL}/api/user/${userId}`,
+            headers: { 'Content-Type': 'application/json' },
+            timeout: 5000
+          });
+          //console.log('🧹 Тестовый пользователь удалён');
+        } catch (err) {
+          console.error('⚠️ Ошибка очистки:', err.message);
+        }
+
+        bru.deleteVar('testUpdateUserId');
 
 settings:
   encodeUrl: true
