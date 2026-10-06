@@ -29,7 +29,7 @@ runtime:
         // Наборы тестовых данных
         const testData = [
           { note: "Невалидный email", login: "testLogin", password: "testPassword", email: "test", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
-          { note: "Невалидный email", login: "testLogin", password: "testPassword", email: "@mail", firstName: "Petr", lastName: "Petrov", secondName: "Petrovich", cod: 401 },
+          { note: "Невалидный email", login: "testLogin", password: "testPassword", email: "@mail", firstName: "Petr", lastName: "Petrov", secondName: "Petrovich", cod: 400 },
           { note: "Невалидный email", login: "testLogin", password: "testPassword", email: "ru", firstName: "Sidor", lastName: "Sidorov", secondName: "Sidorovich", cod: 400 }
         ];
 
