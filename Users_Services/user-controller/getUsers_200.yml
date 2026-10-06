@@ -22,58 +22,87 @@ runtime:
     - type: tests
       code: |-
         test("Status cod = 200", function () {
-            expect(res.getStatus()).to.equal(200);
+          expect(res.getStatus()).to.equal(200);
         });
 
         test("Status text = OK", function () {
-            const body = res.getBody();
-            expect(body.status).to.equal("OK");
+          const body = res.getBody();
+          expect(body.status).to.equal("OK");
         });
 
         test("All users in list have valid and non-empty fields", function () {
-          const users = res.body.payload.users;
+          const body = res.getBody();
+          const users = body.payload?.users;
 
-          if (!Array.isArray(users)) {
-            throw new Error("❌ There is no usres list in the response (field 'users' is not an array).");
-          }
+          // Проверяем, что users — массив
+          expect(users, "Field 'users' should be an array").to.not.be.undefined;
+          expect(Array.isArray(users), "Field 'users' should be an array").to.be.true;
+
           if (users.length === 0) {
             console.warn("⚠️ The users list is empty. Field validation will be skipped.");
             return;
           }
 
-          const emailRegex = new RegExp(bru.getEnvVar('regexEmail'));
-          const loginRegex = new RegExp(bru.getEnvVar('regexLogin'));
+          // Защита от отсутствующих regex-переменных
+          const emailRegexStr = bru.getEnvVar('regexEmail');
+          const loginRegexStr = bru.getEnvVar('regexLogin');
 
-          console.log(`🔍 Checking the fields validity for ${users.length} users...`);
+          if (!emailRegexStr || !loginRegexStr) {
+            throw new Error("❌ Environment variables 'regexEmail' and/or 'regexLogin' are not set.");
+          }
+
+          const emailRegex = new RegExp(emailRegexStr);
+          const loginRegex = new RegExp(loginRegexStr);
+
+          console.log(`🔍 Checking fields validity for ${users.length} users...`);
+
+          // Сборщик ошибок — проверяем ВСЕХ пользователей, не останавливаемся на первом
+          const errors = [];
 
           users.forEach((user, index) => {
             const fio = user.fio;
 
-            if (!fio) throw new Error(`❌ User [${index}]: fio object is missed.`);
-            if (!fio.firstName || fio.firstName.trim() === "") throw new Error(`❌ User [${index}]: field firstName is empty.`);
-            if (!fio.lastName || fio.lastName.trim() === "") throw new Error(`❌ User [${index}]: field lastName is empty.`);
-            if (!fio.secondName || fio.secondName.trim() === "") throw new Error(`❌ User [${index}]: field secondName is empty.`);
+            if (!fio) {
+              errors.push(`User [${index}]: fio object is missing.`);
+              return;
+            }
+
+            if (!fio.firstName || fio.firstName.trim() === "") {
+              errors.push(`User [${index}]: firstName is empty.`);
+            }
+            if (!fio.lastName || fio.lastName.trim() === "") {
+              errors.push(`User [${index}]: lastName is empty.`);
+            }
+            if (!fio.secondName || fio.secondName.trim() === "") {
+              errors.push(`User [${index}]: secondName is empty.`);
+            }
 
             const login = user.login;
             if (typeof login !== "string" || login.trim() === "") {
-              throw new Error(`❌ User [${index}]: field login is missed or empty.`);
-            }
-            if (!loginRegex.test(login)) {
-              throw new Error(`❌ User [${index}]: incorrect format of login '${login}'.`);
+              errors.push(`User [${index}]: login is missing or empty.`);
+            } else if (!loginRegex.test(login)) {
+              errors.push(`User [${index}]: incorrect login format '${login}'.`);
             }
 
             const email = user.email;
             if (typeof email !== "string" || email.trim() === "") {
-              throw new Error(`❌ User [${index}]: field email is missed or empty.`);
-            }
-            if (!emailRegex.test(email)) {
-              throw new Error(`❌ User [${index}]: incorrect format of email '${email}'.`);
+              errors.push(`User [${index}]: email is missing or empty.`);
+            } else if (!emailRegex.test(email)) {
+              errors.push(`User [${index}]: incorrect email format '${email}'.`);
             }
 
-            //console.log(`✅ User [${index}] is checked: FIO, login, email — OK.`);
+            if (errors.length === 0 || errors.every(e => !e.startsWith(`User [${index}]`))) {
+              console.log(`✅ User [${index}] is checked: FIO, login, email — OK.`);
+            }
           });
 
-          console.log('✅ All users in the list are checked for fields validity!');
+          // Если есть ошибки — показываем все сразу и роняем тест
+          if (errors.length > 0) {
+            const message = errors.join("\n");
+            expect.fail(`❌ ${errors.length} error(s) found:\n${message}`);
+          }
+
+          console.log(`✅ All ${users.length} users checked — all fields are valid!`);
         });
 
 settings:

@@ -10,7 +10,7 @@ http:
   url: "{{baseUrl}}/api/user/:id"
   params:
     - name: id
-      value: Not-Exists-Test-User-Id
+      value: Wrong-Format-of-User-Id
       type: path
   auth: inherit
 

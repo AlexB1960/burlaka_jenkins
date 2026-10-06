@@ -1,7 +1,7 @@
 info:
-  name: register_200_dataset
+  name: register_dataset+ copy
   type: http
-  seq: 24
+  seq: 28
   tags:
     - user-controller
 
@@ -21,9 +21,9 @@ runtime:
 
         //Наборы тестовых данных
         const testData = [
-          { login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich" },
-          { login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Petr", lastName: "Petrov", secondName: "Petrovich" },
-          { login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Sidor", lastName: "Sidorov", secondName: "Sidorovich" }
+          { login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 201 },
+          { login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Petr", lastName: "Petrov", secondName: "Petrovich", cod: 201 },
+          { login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Sidor", lastName: "Sidorov", secondName: "Sidorovich", cod: 201 }
         ];
 
         console.log(`🚀 Запуск ${testData.length} наборов тестовых данных...`);
@@ -63,8 +63,8 @@ runtime:
               timeout: 10000
             });
 
-            if (res.status !== 201) {
-              throw new Error(`Ожидался статус 201, получен ${res.status}.`);
+            if (res.status !== testData[i].cod) {
+              throw new Error(`Ожидался статус ${testData[i].cod}, получен ${res.status}.`);
             }
 
             userId = res.data?.payload?.user?.id;
@@ -72,7 +72,7 @@ runtime:
               throw new Error('Не удалось извлечь ID из ответа.');
             }
 
-            console.log(`✅ Набор данных ${i + 1}: пользователь создан (статус 201), ID=${userId}`);
+            console.log(`✅ Набор данных ${i + 1}: создан пользователь (статус ${testData[i].cod}), ID=${userId}`);
           } catch (err) {
             throw new Error(`❌ Набор данных ${i + 1}: ошибка создания — ${err.message}`);
           }

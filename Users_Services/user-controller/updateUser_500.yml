@@ -1,7 +1,7 @@
 info:
   name: updateUser_500
   type: http
-  seq: 22
+  seq: 24
   tags:
     - user-controller
 
@@ -10,7 +10,7 @@ http:
   url: "{{baseUrl}}/api/user/:id"
   params:
     - name: id
-      value: Not-Exists-Test-User-Id
+      value: Wrong-Format-of-User-Id
       type: path
   body:
     type: json

@@ -1,0 +1,183 @@
+info:
+  name: register_dataset+
+  type: http
+  seq: 26
+  tags:
+    - user-controller
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/user"
+  body:
+    type: json
+    data: ""
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        const baseURL = bru.getEnvVar('baseUrl');
+
+        // --- Хелперы для тестов (вне цикла) ---
+        function assertStatus(idx, expected, actual) {
+          test(`Набор ${idx}: статус ${expected}`, function() {
+            expect(actual).to.equal(expected);
+          });
+        }
+
+        function assertUserId(idx, userId) {
+          test(`Набор ${idx}: ID извлечён из ответа`, function() {
+            expect(userId).to.not.be.undefined;
+            expect(userId).to.not.be.null;
+          });
+        }
+
+        // Наборы тестовых данных
+        const testData = [
+          { note: "Длина firstName = 2 символа", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Iv", lastName: "Ivanov", secondName: "Ivanovich", cod: 201 },
+          { note: "Длина firstName = 3 символа", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Pet", lastName: "Petrov", secondName: "Petrovich", cod: 209 },
+          { note: "Длина lastName = 2 символа", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Sidor", lastName: "Si", secondName: "Sidorovich", cod: 201 }
+        ];
+
+        console.log(`🚀 Запуск ${testData.length} наборов позитивных тестовых данных...`);
+
+        let passed = 0;
+        let failed = 0;
+
+        for (let i = 0; i < testData.length; i++) {
+          const data = testData[i];
+          const suffix = Math.random().toString(36).substring(2, 8);
+          const uniqueLogin = data.login + "_" + suffix;
+          const uniquePassword = data.password + "_" + suffix;
+          const uniqueEmail = suffix + "_" + data.email;
+
+          console.log(`\n📦 Набор ${i + 1}/${testData.length} (${data.note}): login=${uniqueLogin}, email=${uniqueEmail}, firstName=${data.firstName}, lastName=${data.lastName}, secondName=${data.secondName}, ожидаемый статус=${data.cod}`);
+
+          const requestBody = {
+            user: {
+              login: uniqueLogin,
+              password: uniquePassword,
+              email: uniqueEmail,
+              fio: {
+                firstName: data.firstName,
+                lastName: data.lastName,
+                secondName: data.secondName
+              }
+            }
+          };
+
+          let actualStatus = null;
+          let userId = null;
+
+          // --- Создание тестового пользователя ---
+          try {
+            const res = await bru.sendRequest({
+              method: 'POST',
+              url: `${baseURL}/api/user/register`,
+              headers: { 'Content-Type': 'application/json' },
+              data: requestBody,
+              timeout: 10000
+            });
+            actualStatus = res.status;
+            userId = res.data?.payload?.user?.id;
+          } catch (err) {
+            actualStatus = err.response?.status || err.status || null;
+            userId = err.response?.data?.payload?.user?.id;
+          }
+
+          // --- Проверки (вызов хелперов вместо function() в цикле) ---
+          assertStatus(i + 1, data.cod, actualStatus);
+          assertUserId(i + 1, userId);
+
+          if (actualStatus === data.cod && userId) {
+            console.log(`✅ Набор ${i + 1}: создан пользователь ID=${userId} (получен статус ${actualStatus})`);
+            passed++;
+          } else {
+            console.log(`❌ Набор ${i + 1}: failed — статус ${actualStatus}, userId=${userId}`);
+            failed++;
+          }
+
+          // --- Удаление тестового пользователя ---
+          if (userId) {
+            try {
+              const delRes = await bru.sendRequest({
+                method: 'DELETE',
+                url: `${baseURL}/api/user/${userId}`,
+                headers: { 'Content-Type': 'application/json' },
+                timeout: 5000
+              });
+              console.log(`🧹 Набор ${i + 1}: пользователь ${userId} удалён (статус ${delRes.status}).`);
+            } catch (err) {
+              const delStatus = err.response?.status || err.status || 'unknown';
+              if (delStatus === 404) {
+                console.log(`🧹 Набор ${i + 1}: пользователь ${userId} уже удалён (404).`);
+              } else {
+                console.warn(`⚠️ Набор ${i + 1}: не удалось удалить пользователя ${userId} (статус ${delStatus}): ${err.message}`);
+              }
+            }
+          }
+        }
+
+        // --- Итог ---
+        console.log(`\n${'='.repeat(50)}`);
+        console.log(`📊 Итого: ${passed} passed, ${failed} failed из ${testData.length} наборов`);
+        console.log(`${'='.repeat(50)}`);
+
+        if (failed > 0) {
+          throw new Error(`${failed} тест(ов) провалено`);
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: 200 Response
+    description: OK
+    request:
+      url: "{{baseUrl}}/api/user/register"
+      method: POST
+      body:
+        type: json
+        data: |-
+          {
+            "user": {
+              "login": "",
+              "password": "",
+              "email": "",
+              "fio": {
+                "firstName": "",
+                "lastName": "",
+                "secondName": ""
+              }
+            }
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: "*/*"
+      body:
+        type: text
+        data: |-
+          {
+            "message": "",
+            "status": "OK",
+            "payload": {
+              "user": {
+                "id": "",
+                "login": "",
+                "email": "",
+                "fio": {
+                  "firstName": "",
+                  "lastName": "",
+                  "secondName": ""
+                }
+              }
+            }
+          }

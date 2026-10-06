@@ -1,7 +1,7 @@
 info:
   name: updateUser_tmp
   type: http
-  seq: 21
+  seq: 23
   tags:
     - user-controller
 

@@ -1,0 +1,179 @@
+info:
+  name: register_dataset-
+  type: http
+  seq: 29
+  tags:
+    - user-controller
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/user"
+  body:
+    type: json
+    data: ""
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        const baseURL = bru.getEnvVar('baseUrl');
+
+        // --- Хелпер для тестов (вне цикла) ---
+        function assertStatus(idx, expected, actual) {
+          test(`Набор ${idx}: статус ${expected}`, function() {
+            expect(actual).to.equal(expected);
+          });
+        }
+
+        // Наборы тестовых данных
+        const testData = [
+          { note: "Невалидный email", login: "testLogin", password: "testPassword", email: "test", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
+          { note: "Невалидный email", login: "testLogin", password: "testPassword", email: "@mail", firstName: "Petr", lastName: "Petrov", secondName: "Petrovich", cod: 401 },
+          { note: "Невалидный email", login: "testLogin", password: "testPassword", email: "ru", firstName: "Sidor", lastName: "Sidorov", secondName: "Sidorovich", cod: 400 }
+        ];
+
+        console.log(`🚀 Запуск ${testData.length} наборов негативных тестовых данных...`);
+
+        let passed = 0;
+        let failed = 0;
+
+        for (let i = 0; i < testData.length; i++) {
+          const data = testData[i];
+          const suffix = Math.random().toString(36).substring(2, 8);
+          const uniqueLogin = data.login + "_" + suffix;
+          const uniquePassword = data.password + "_" + suffix;
+          const uniqueEmail = suffix + "_" + data.email;
+
+          console.log(`\n📦 Набор ${i + 1}/${testData.length} (${data.note}): login=${uniqueLogin}, email=${uniqueEmail}, firstName=${data.firstName}, lastName=${data.lastName}, secondName=${data.secondName}, ожидаемый статус=${data.cod}`);
+
+          const requestBody = {
+            user: {
+              login: uniqueLogin,
+              password: uniquePassword,
+              email: uniqueEmail,
+              fio: {
+                firstName: data.firstName,
+                lastName: data.lastName,
+                secondName: data.secondName
+              }
+            }
+          };
+
+          let actualStatus = null;
+          let userId = null;
+          let requestError = null;
+
+          // --- Отправка запроса ---
+          try {
+            const res = await bru.sendRequest({
+              method: 'POST',
+              url: `${baseURL}/api/user/register`,
+              headers: { 'Content-Type': 'application/json' },
+              data: requestBody,
+              timeout: 10000
+            });
+            // Сюда попадаем только при статусе 2xx
+            actualStatus = res.status;
+            userId = res.data?.payload?.user?.id;
+          } catch (err) {
+            // Сюда попадаем при статусе 400+
+            requestError = err;
+            actualStatus = err.response?.status || err.status || null;
+          }
+
+          // --- Проверка статуса (функция assertStatus объявлена вне цикла)---
+          assertStatus(i + 1, data.cod, actualStatus);
+
+          if (actualStatus === data.cod) {
+            console.log(`✅ Набор ${i + 1}: passed — получен статус ${actualStatus}`);
+            passed++;
+          } else {
+            console.log(`❌ Набор ${i + 1}: failed — ожидался ${data.cod}, получен ${actualStatus}`);
+            failed++;
+          }
+
+          // --- Очистка: если сервер ошибочно создал пользователя ---
+          if (userId) {
+            console.log(`⚠️ Набор ${i + 1}: сервер ошибочно создал пользователя ID=${userId}, удаляю...`);
+            try {
+              const delRes = await bru.sendRequest({
+                method: 'DELETE',
+                url: `${baseURL}/api/user/${userId}`,
+                headers: { 'Content-Type': 'application/json' },
+                timeout: 5000
+              });
+              console.log(`🧹 Пользователь ${userId} удалён (статус ${delRes.status}).`);
+            } catch (err) {
+              const delStatus = err.response?.status || err.status || 'unknown';
+              if (delStatus === 404) {
+                console.log(`🧹 Пользователь ${userId} уже удалён (404).`);
+              } else {
+                console.warn(`⚠️ Не удалось удалить пользователя ${userId} (статус ${delStatus}): ${err.message}`);
+              }
+            }
+          }
+        }
+
+        // --- Итог ---
+        console.log(`\n${'='.repeat(50)}`);
+        console.log(`📊 Итого: ${passed} passed, ${failed} failed из ${testData.length} наборов`);
+        console.log(`${'='.repeat(50)}`);
+
+        if (failed > 0) {
+          throw new Error(`${failed} тест(ов) провалено`);
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: 200 Response
+    description: OK
+    request:
+      url: "{{baseUrl}}/api/user/register"
+      method: POST
+      body:
+        type: json
+        data: |-
+          {
+            "user": {
+              "login": "",
+              "password": "",
+              "email": "",
+              "fio": {
+                "firstName": "",
+                "lastName": "",
+                "secondName": ""
+              }
+            }
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: "*/*"
+      body:
+        type: text
+        data: |-
+          {
+            "message": "",
+            "status": "OK",
+            "payload": {
+              "user": {
+                "id": "",
+                "login": "",
+                "email": "",
+                "fio": {
+                  "firstName": "",
+                  "lastName": "",
+                  "secondName": ""
+                }
+              }
+            }
+          }

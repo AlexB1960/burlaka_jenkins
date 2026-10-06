@@ -53,7 +53,7 @@ runtime:
         }
     - type: tests
       code: |-
-        // 1. Проверяем DELETE
+        // 1. Проверяем код выполнения DELETE
         test("Status cod = 200", function () {
           expect(res.getStatus()).to.equal(200);
         });

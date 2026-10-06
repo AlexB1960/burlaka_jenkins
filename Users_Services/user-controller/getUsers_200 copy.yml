@@ -1,0 +1,128 @@
+info:
+  name: getUsers_200 copy
+  type: http
+  seq: 14
+  tags:
+    - user-controller
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/user?page=1&size=30"
+  params:
+    - name: page
+      value: "1"
+      type: query
+    - name: size
+      value: "30"
+      type: query
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("Status cod = 200", function () {
+            expect(res.getStatus()).to.equal(200);
+        });
+
+        test("Status text = OK", function () {
+            const body = res.getBody();
+            expect(body.status).to.equal("OK");
+        });
+
+        test("All users in list have valid and non-empty fields", function () {
+          const users = res.body.payload.users;
+
+          if (!Array.isArray(users)) {
+            throw new Error("❌ There is no usres list in the response (field 'users' is not an array).");
+          }
+          if (users.length === 0) {
+            console.warn("⚠️ The users list is empty. Field validation will be skipped.");
+            return;
+          }
+
+          const emailRegex = new RegExp(bru.getEnvVar('regexEmail'));
+          const loginRegex = new RegExp(bru.getEnvVar('regexLogin'));
+
+          console.log(`🔍 Checking the fields validity for ${users.length} users...`);
+
+          users.forEach((user, index) => {
+            const fio = user.fio;
+
+            if (!fio) throw new Error(`❌ User [${index}]: fio object is missed.`);
+            if (!fio.firstName || fio.firstName.trim() === "") throw new Error(`❌ User [${index}]: field firstName is empty.`);
+            if (!fio.lastName || fio.lastName.trim() === "") throw new Error(`❌ User [${index}]: field lastName is empty.`);
+            if (!fio.secondName || fio.secondName.trim() === "") throw new Error(`❌ User [${index}]: field secondName is empty.`);
+
+            const login = user.login;
+            if (typeof login !== "string" || login.trim() === "") {
+              throw new Error(`❌ User [${index}]: field login is missed or empty.`);
+            }
+            if (!loginRegex.test(login)) {
+              throw new Error(`❌ User [${index}]: incorrect format of login '${login}'.`);
+            }
+
+            const email = user.email;
+            if (typeof email !== "string" || email.trim() === "") {
+              throw new Error(`❌ User [${index}]: field email is missed or empty.`);
+            }
+            if (!emailRegex.test(email)) {
+              throw new Error(`❌ User [${index}]: incorrect format of email '${email}'.`);
+            }
+
+            //console.log(`✅ User [${index}] is checked: FIO, login, email — OK.`);
+          });
+
+          console.log('✅ All users in the list are checked for fields validity!');
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: 200 Response
+    description: OK
+    request:
+      url: "{{baseUrl}}/api/user"
+      method: GET
+      params:
+        - name: page
+          value: "1"
+          type: query
+        - name: size
+          value: "10"
+          type: query
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: "*/*"
+      body:
+        type: text
+        data: |-
+          {
+            "message": "",
+            "status": "OK",
+            "payload": {
+              "page": 0,
+              "pageCount": 0,
+              "countOnPage": 0,
+              "users": [
+                {
+                  "id": "",
+                  "login": "",
+                  "email": "",
+                  "fio": {
+                    "firstName": "",
+                    "lastName": "",
+                    "secondName": ""
+                  }
+                }
+              ]
+            }
+          }

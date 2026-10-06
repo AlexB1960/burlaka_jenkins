@@ -1,7 +1,7 @@
 info:
   name: register
   type: http
-  seq: 23
+  seq: 25
   tags:
     - user-controller
 
