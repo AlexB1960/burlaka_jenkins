@@ -36,7 +36,7 @@ runtime:
         // Наборы тестовых данных
         const testData = [
           { note: "Длина firstName = 2 символа", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Iv", lastName: "Ivanov", secondName: "Ivanovich", cod: 201 },
-          { note: "Длина firstName = 3 символа", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Pet", lastName: "Petrov", secondName: "Petrovich", cod: 201 },
+          { note: "Длина firstName = 3 символа", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Pet", lastName: "Petrov", secondName: "Petrovich", cod: 209 },
           { note: "Длина lastName = 2 символа", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Sidor", lastName: "Si", secondName: "Sidorovich", cod: 201 }
         ];
 
@@ -125,7 +125,9 @@ runtime:
         console.log(`${'='.repeat(50)}`);
 
         if (failed > 0) {
-          throw new Error(`${failed} тест(ов) провалено`);
+          test(`Итог: ${failed} из ${testData.length} наборов провалены`, function() {
+            expect.fail(`${failed} из ${testData.length} наборов провалены`);
+          });
         }
 
 settings:
