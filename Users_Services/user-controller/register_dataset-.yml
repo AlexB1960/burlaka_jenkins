@@ -91,7 +91,7 @@ runtime:
           }
 
           if (userId) {
-            console.log(`⚠️ Dataset ${i + 1}: wrong created user ID=${userId},  is being deleted...`);
+            console.log(`⚠️ Dataset ${i + 1}: wrong created user ID=${userId} is being deleted...`);
             try {
               const delRes = await bru.sendRequest({
                 method: 'DELETE',
