@@ -1,7 +1,7 @@
 info:
   name: register_dataset+
   type: http
-  seq: 26
+  seq: 22
   tags:
     - user-controller
 
@@ -19,28 +19,27 @@ runtime:
       code: |-
         const baseURL = bru.getEnvVar('baseUrl');
 
-        // --- Хелперы для тестов (вне цикла) ---
-        function assertStatus(idx, expected, actual) {
-          test(`Набор ${idx}: статус ${expected}`, function() {
+        function assertStatus(idx, expected, note, actual) {
+          test(`Dataset ${idx}: status ${expected} (${note})`, function() {
             expect(actual).to.equal(expected);
           });
         }
 
         function assertUserId(idx, userId) {
-          test(`Набор ${idx}: ID извлечён из ответа`, function() {
+          test(`Dataset ${idx}: ID is received from response`, function() {
             expect(userId).to.not.be.undefined;
             expect(userId).to.not.be.null;
           });
         }
 
-        // Наборы тестовых данных
         const testData = [
-          { note: "Длина firstName = 2 символа", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Iv", lastName: "Ivanov", secondName: "Ivanovich", cod: 201 },
-          { note: "Длина firstName = 3 символа", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Pet", lastName: "Petrov", secondName: "Petrovich", cod: 209 },
-          { note: "Длина lastName = 2 символа", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Sidor", lastName: "Si", secondName: "Sidorovich", cod: 201 }
+          { note: "firstName = 2 signs", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Iv", lastName: "Ivanov", secondName: "Ivanovich", cod: 201 },
+          { note: "firstName = 3 signs", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Pet", lastName: "Petrov", secondName: "Petrovich", cod: 201 },
+          { note: "lastName = 2 signs", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Sidor", lastName: "Si", secondName: "Sidorovich", cod: 201 },
+          { note: "lastName = 3 signs", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Sidor", lastName: "Sid", secondName: "Sidorovich", cod: 201 }
         ];
 
-        console.log(`🚀 Запуск ${testData.length} наборов позитивных тестовых данных...`);
+        console.log(`🚀 Start ${testData.length} positive datasets...`);
 
         let passed = 0;
         let failed = 0;
@@ -52,7 +51,7 @@ runtime:
           const uniquePassword = data.password + "_" + suffix;
           const uniqueEmail = suffix + "_" + data.email;
 
-          console.log(`\n📦 Набор ${i + 1}/${testData.length} (${data.note}): login=${uniqueLogin}, email=${uniqueEmail}, firstName=${data.firstName}, lastName=${data.lastName}, secondName=${data.secondName}, ожидаемый статус=${data.cod}`);
+          console.log(`\n📦 Dataset ${i + 1}/${testData.length} (${data.note}): login=${uniqueLogin}, email=${uniqueEmail}, firstName=${data.firstName}, lastName=${data.lastName}, secondName=${data.secondName}, expected status=${data.cod}`);
 
           const requestBody = {
             user: {
@@ -70,7 +69,6 @@ runtime:
           let actualStatus = null;
           let userId = null;
 
-          // --- Создание тестового пользователя ---
           try {
             const res = await bru.sendRequest({
               method: 'POST',
@@ -86,19 +84,17 @@ runtime:
             userId = err.response?.data?.payload?.user?.id;
           }
 
-          // --- Проверки (вызов хелперов вместо function() в цикле) ---
-          assertStatus(i + 1, data.cod, actualStatus);
+          assertStatus(i + 1, data.cod, data.note, actualStatus);
           assertUserId(i + 1, userId);
 
           if (actualStatus === data.cod && userId) {
-            console.log(`✅ Набор ${i + 1}: создан пользователь ID=${userId} (получен статус ${actualStatus})`);
+            console.log(`✅ Dataset ${i + 1}: user is created ID=${userId} (received status ${actualStatus})`);
             passed++;
           } else {
-            console.log(`❌ Набор ${i + 1}: failed — статус ${actualStatus}, userId=${userId}`);
+            console.log(`❌ Dataset ${i + 1}: failed — received status ${actualStatus}, userId=${userId}`);
             failed++;
           }
 
-          // --- Удаление тестового пользователя ---
           if (userId) {
             try {
               const delRes = await bru.sendRequest({
@@ -107,26 +103,25 @@ runtime:
                 headers: { 'Content-Type': 'application/json' },
                 timeout: 5000
               });
-              console.log(`🧹 Набор ${i + 1}: пользователь ${userId} удалён (статус ${delRes.status}).`);
+              console.log(`🧹 Dataset ${i + 1}: user ${userId} is deleted (status ${delRes.status}).`);
             } catch (err) {
               const delStatus = err.response?.status || err.status || 'unknown';
               if (delStatus === 404) {
-                console.log(`🧹 Набор ${i + 1}: пользователь ${userId} уже удалён (404).`);
+                console.log(`🧹 Dataset ${i + 1}: user ${userId} has already deleted (404).`);
               } else {
-                console.warn(`⚠️ Набор ${i + 1}: не удалось удалить пользователя ${userId} (статус ${delStatus}): ${err.message}`);
+                console.warn(`⚠️ Dataset ${i + 1}: user could not be deleted ${userId} (status ${delStatus}): ${err.message}`);
               }
             }
           }
         }
 
-        // --- Итог ---
         console.log(`\n${'='.repeat(50)}`);
-        console.log(`📊 Итого: ${passed} passed, ${failed} failed из ${testData.length} наборов`);
+        console.log(`📊 Total: ${passed} passed, ${failed} failed from ${testData.length} datasets`);
         console.log(`${'='.repeat(50)}`);
 
         if (failed > 0) {
-          test(`Итог: ${failed} из ${testData.length} наборов провалены`, function() {
-            expect.fail(`${failed} из ${testData.length} наборов провалены`);
+          test(`Total: ${failed} failed from ${testData.length} datasets`, function() {
+            expect.fail(`${failed} failed from ${testData.length} datasets`);
           });
         }
 

@@ -1,7 +1,7 @@
 info:
   name: updateUser_200
   type: http
-  seq: 21
+  seq: 18
   tags:
     - user-controller
 
@@ -33,7 +33,6 @@ runtime:
   scripts:
     - type: before-request
       code: |-
-        // Создание нового тестового пользователя
         const baseURL = bru.getEnvVar('baseUrl');
 
         const suffix = Math.random().toString(36).substring(2, 8);
@@ -68,7 +67,6 @@ runtime:
         }
     - type: tests
       code: |-
-        // 1. Проверяем ответ UPDATE (res — в памяти, работает всегда)
         test("Status cod = 200", function () {
           expect(res.getStatus()).to.equal(200);
         });
@@ -92,7 +90,6 @@ runtime:
         });
 
 
-        // 2. (Опционально) Дополнительный GET для проверки в БД
         const baseURL = bru.getEnvVar('baseUrl');
         const userId = bru.getVar('testUpdateUserId');
         try {
@@ -116,7 +113,6 @@ runtime:
           console.error('GET-проверка не удалась:', err.message);
         }
 
-        // 3. Очистка (Delete) — в самом конце, гарантированно
         try {
           await bru.sendRequest({
             method: 'DELETE',

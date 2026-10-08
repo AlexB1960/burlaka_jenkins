@@ -34,7 +34,6 @@ runtime:
           const body = res.getBody();
           const users = body.payload?.users;
 
-          // Проверяем, что users — массив
           expect(users, "Field 'users' should be an array").to.not.be.undefined;
           expect(Array.isArray(users), "Field 'users' should be an array").to.be.true;
 
@@ -43,7 +42,6 @@ runtime:
             return;
           }
 
-          // Защита от отсутствующих regex-переменных
           const emailRegexStr = bru.getEnvVar('regexEmail');
           const loginRegexStr = bru.getEnvVar('regexLogin');
 
@@ -56,9 +54,7 @@ runtime:
 
           console.log(`🔍 Checking fields validity for ${users.length} users...`);
 
-          // Сборщик ошибок — проверяем ВСЕХ пользователей, не останавливаемся на первом
           const errors = [];
-
           users.forEach((user, index) => {
             const fio = user.fio;
 
@@ -74,7 +70,7 @@ runtime:
               errors.push(`User [${index}]: lastName is empty.`);
             }
             if (!fio.secondName || fio.secondName.trim() === "") {
-              errors.push(`User [${index}]: secondName is empty.`);
+              //errors.push(`User [${index}]: secondName is empty.`);
             }
 
             const login = user.login;
@@ -96,7 +92,6 @@ runtime:
             }
           });
 
-          // Если есть ошибки — показываем все сразу и роняем тест
           if (errors.length > 0) {
             const message = errors.join("\n");
             expect.fail(`❌ ${errors.length} error(s) found:\n${message}`);

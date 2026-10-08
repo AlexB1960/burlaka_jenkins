@@ -1,7 +1,7 @@
 info:
   name: getUserByLogin_404
   type: http
-  seq: 19
+  seq: 16
   tags:
     - user-controller
 

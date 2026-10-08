@@ -1,7 +1,7 @@
 info:
   name: register_dataset-
   type: http
-  seq: 29
+  seq: 23
   tags:
     - user-controller
 
@@ -19,21 +19,22 @@ runtime:
       code: |-
         const baseURL = bru.getEnvVar('baseUrl');
 
-        // --- Хелпер для тестов (вне цикла) ---
-        function assertStatus(idx, expected, actual) {
-          test(`Набор ${idx}: статус ${expected}`, function() {
+        function assertStatus(idx, expected, note, actual) {
+          test(`Dataset ${idx}: status ${expected} (${note})`, function() {
             expect(actual).to.equal(expected);
           });
         }
 
-        // Наборы тестовых данных
         const testData = [
-          { note: "Невалидный email", login: "testLogin", password: "testPassword", email: "test", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
-          { note: "Невалидный email", login: "testLogin", password: "testPassword", email: "@mail", firstName: "Petr", lastName: "Petrov", secondName: "Petrovich", cod: 401 },
-          { note: "Невалидный email", login: "testLogin", password: "testPassword", email: "ru", firstName: "Sidor", lastName: "Sidorov", secondName: "Sidorovich", cod: 400 }
+          { note: "Invalid email=test", login: "testLogin", password: "testPassword", email: "test", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
+          { note: "Invalid email=mail.ru", login: "testLogin", password: "testPassword", email: "mail.ru", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
+          { note: "Invalid email=@.ru", login: "testLogin", password: "testPassword", email: "@.ru", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
+          { note: "Invalid firstName = empty", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "", lastName: "Petrov", secondName: "Petrovich", cod: 400 },
+          { note: "Invalid firstName = 1 sign", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "S", lastName: "Sidorov", secondName: "Sidorovich", cod: 400 },
+          { note: "Invalid lastName = empty", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Ivan", lastName: "", secondName: "Petrovich", cod: 400 }
         ];
 
-        console.log(`🚀 Запуск ${testData.length} наборов негативных тестовых данных...`);
+        console.log(`🚀 Start ${testData.length} negative datasets...`);
 
         let passed = 0;
         let failed = 0;
@@ -45,7 +46,7 @@ runtime:
           const uniquePassword = data.password + "_" + suffix;
           const uniqueEmail = suffix + "_" + data.email;
 
-          console.log(`\n📦 Набор ${i + 1}/${testData.length} (${data.note}): login=${uniqueLogin}, email=${uniqueEmail}, firstName=${data.firstName}, lastName=${data.lastName}, secondName=${data.secondName}, ожидаемый статус=${data.cod}`);
+          console.log(`\n📦 Dataset ${i + 1}/${testData.length} (${data.note}): login=${uniqueLogin}, email=${uniqueEmail}, firstName=${data.firstName}, lastName=${data.lastName}, secondName=${data.secondName}, expected status=${data.cod}`);
 
           const requestBody = {
             user: {
@@ -64,7 +65,6 @@ runtime:
           let userId = null;
           let requestError = null;
 
-          // --- Отправка запроса ---
           try {
             const res = await bru.sendRequest({
               method: 'POST',
@@ -73,29 +73,25 @@ runtime:
               data: requestBody,
               timeout: 10000
             });
-            // Сюда попадаем только при статусе 2xx
             actualStatus = res.status;
             userId = res.data?.payload?.user?.id;
           } catch (err) {
-            // Сюда попадаем при статусе 400+
             requestError = err;
             actualStatus = err.response?.status || err.status || null;
           }
 
-          // --- Проверка статуса (функция assertStatus объявлена вне цикла)---
-          assertStatus(i + 1, data.cod, actualStatus);
+          assertStatus(i + 1, data.cod, data.note, actualStatus);
 
           if (actualStatus === data.cod) {
-            console.log(`✅ Набор ${i + 1}: passed — получен статус ${actualStatus}`);
+            console.log(`✅ Dataset ${i + 1}: passed — received status ${actualStatus}`);
             passed++;
           } else {
-            console.log(`❌ Набор ${i + 1}: failed — ожидался ${data.cod}, получен ${actualStatus}`);
+            console.log(`❌ Dataset ${i + 1}: failed — expected status ${data.cod}, received status ${actualStatus}`);
             failed++;
           }
 
-          // --- Очистка: если сервер ошибочно создал пользователя ---
           if (userId) {
-            console.log(`⚠️ Набор ${i + 1}: сервер ошибочно создал пользователя ID=${userId}, удаляю...`);
+            console.log(`⚠️ Dataset ${i + 1}: wrong created user ID=${userId},  is being deleted...`);
             try {
               const delRes = await bru.sendRequest({
                 method: 'DELETE',
@@ -103,26 +99,25 @@ runtime:
                 headers: { 'Content-Type': 'application/json' },
                 timeout: 5000
               });
-              console.log(`🧹 Пользователь ${userId} удалён (статус ${delRes.status}).`);
+              console.log(`🧹 User ${userId} is deleted (status ${delRes.status}).`);
             } catch (err) {
               const delStatus = err.response?.status || err.status || 'unknown';
               if (delStatus === 404) {
-                console.log(`🧹 Пользователь ${userId} уже удалён (404).`);
+                console.log(`🧹 User ${userId} has already deleted (404).`);
               } else {
-                console.warn(`⚠️ Не удалось удалить пользователя ${userId} (статус ${delStatus}): ${err.message}`);
+                console.warn(`⚠️ User could not been deleted ${userId} (status ${delStatus}): ${err.message}`);
               }
             }
           }
         }
 
-        // --- Итог ---
         console.log(`\n${'='.repeat(50)}`);
-        console.log(`📊 Итого: ${passed} passed, ${failed} failed из ${testData.length} наборов`);
+        console.log(`📊 Total: ${passed} passed, ${failed} failed from ${testData.length} datasets`);
         console.log(`${'='.repeat(50)}`);
 
         if (failed > 0) {
-          test(`Итог: ${failed} из ${testData.length} наборов провалены`, function() {
-            expect.fail(`${failed} из ${testData.length} наборов провалены`);
+          test(`Total: ${failed} failed from ${testData.length} datasets`, function() {
+            expect.fail(`${failed} failed from ${testData.length} datasets`);
           });
         }
 
