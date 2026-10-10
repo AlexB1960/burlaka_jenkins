@@ -26,12 +26,15 @@ runtime:
         }
 
         const testData = [
-          { note: "Invalid email=test", login: "testLogin", password: "testPassword", email: "test", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
-          { note: "Invalid email=mail.ru", login: "testLogin", password: "testPassword", email: "mail.ru", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
-          { note: "Invalid email=@.ru", login: "testLogin", password: "testPassword", email: "@.ru", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
-          { note: "Invalid firstName = empty", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "", lastName: "Petrov", secondName: "Petrovich", cod: 400 },
-          { note: "Invalid firstName = 1 sign", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "S", lastName: "Sidorov", secondName: "Sidorovich", cod: 400 },
-          { note: "Invalid lastName = empty", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Ivan", lastName: "", secondName: "Petrovich", cod: 400 }
+          { note: "Invalid login=Логин", login: "Логин", password: "testPasswordN", email: "test@mail.ru", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
+          { note: "Invalid login=empty", login: "", password: "testPasswordN", email: "test@mail.ru", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
+          { note: "Invalid password=empty", login: "testLoginN", password: "", email: "test@mail.ru", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
+          { note: "Invalid email=empty", login: "testLoginN", password: "testPasswordN", email: "", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
+          { note: "Invalid email=test", login: "testLoginN", password: "testPasswordN", email: "test", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
+          { note: "Invalid email=mail.ru", login: "testLoginN", password: "testPasswordN", email: "mail.ru", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
+          { note: "Invalid email=@.ru", login: "testLoginN", password: "testPasswordN", email: "@.ru", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
+          { note: "Invalid firstName = empty", login: "testLoginN", password: "testPasswordN", email: "test@mail.ru", firstName: "", lastName: "Petrov", secondName: "Petrovich", cod: 400 },
+          { note: "Invalid lastName = empty", login: "testLoginN", password: "testPasswordN", email: "test@mail.ru", firstName: "Ivan", lastName: "", secondName: "Petrovich", cod: 400 }
         ];
 
         console.log(`🚀 Start ${testData.length} negative datasets...`);
@@ -41,18 +44,18 @@ runtime:
 
         for (let i = 0; i < testData.length; i++) {
           const data = testData[i];
-          const suffix = Math.random().toString(36).substring(2, 8);
-          const uniqueLogin = data.login + "_" + suffix;
-          const uniquePassword = data.password + "_" + suffix;
-          const uniqueEmail = suffix + "_" + data.email;
+          //const suffix = Math.random().toString(36).substring(2, 8);
+          //const uniqueLogin = data.login + suffix;
+          //const uniquePassword = data.password + suffix;
+          //const uniqueEmail = suffix + data.email;
 
-          console.log(`\n📦 Dataset ${i + 1}/${testData.length} (${data.note}): login=${uniqueLogin}, email=${uniqueEmail}, firstName=${data.firstName}, lastName=${data.lastName}, secondName=${data.secondName}, expected status=${data.cod}`);
+          console.log(`\n📦 Dataset ${i + 1}/${testData.length} (${data.note}): login=${data.login}, email=${data.email}, firstName=${data.firstName}, lastName=${data.lastName}, secondName=${data.secondName}, expected status=${data.cod}`);
 
           const requestBody = {
             user: {
-              login: uniqueLogin,
-              password: uniquePassword,
-              email: uniqueEmail,
+              login: data.login,
+              password: data.password,
+              email: data.email,
               fio: {
                 firstName: data.firstName,
                 lastName: data.lastName,

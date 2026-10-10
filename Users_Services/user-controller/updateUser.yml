@@ -16,15 +16,11 @@ http:
     type: json
     data: |-
       {
-        "user": {
-          "login": "",
-          "password": "",
-          "email": "",
-          "fio": {
-            "firstName": "",
-            "lastName": "",
-            "secondName": ""
-          }
+        "password": "",
+        "fio": {
+          "firstName": "",
+          "lastName": "",
+          "secondName": ""
         }
       }
   auth: inherit

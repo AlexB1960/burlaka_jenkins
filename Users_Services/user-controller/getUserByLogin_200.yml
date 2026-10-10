@@ -23,9 +23,9 @@ runtime:
         const suffix = Math.random().toString(36).substring(2, 8);
         const userData = {
           "user": {
-            "login": "testLogin_" + suffix,
-            "password": "testPassword_" + suffix,
-            "email": "test_" + suffix + "@mail.ru",
+            "login": "testLogin" + suffix,
+            "password": "testPassword" + suffix,
+            "email": "test" + suffix + "@mail.ru",
             "fio": {
               "firstName": "testName_ByLogin",
               "lastName": "testLastname_ByLogin",

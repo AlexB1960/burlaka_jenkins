@@ -33,10 +33,11 @@ runtime:
         }
 
         const testData = [
-          { note: "firstName = 2 signs", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Iv", lastName: "Ivanov", secondName: "Ivanovich", cod: 201 },
-          { note: "firstName = 3 signs", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Pet", lastName: "Petrov", secondName: "Petrovich", cod: 201 },
+          { note: "firstName = 1 sign", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "I", lastName: "Ivanov", secondName: "Ivanovich", cod: 201 },
+          { note: "firstName = 2 signs", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Pe", lastName: "Petrov", secondName: "Petrovich", cod: 201 },
+          { note: "lastName = 1 sign", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Sidor", lastName: "S", secondName: "Sidorovich", cod: 201 },
           { note: "lastName = 2 signs", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Sidor", lastName: "Si", secondName: "Sidorovich", cod: 201 },
-          { note: "lastName = 3 signs", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Sidor", lastName: "Sid", secondName: "Sidorovich", cod: 201 }
+          { note: "secondName = empty", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Fedor", lastName: "Fedorov", secondName: "", cod: 201 }
         ];
 
         console.log(`🚀 Start ${testData.length} positive datasets...`);
@@ -47,9 +48,9 @@ runtime:
         for (let i = 0; i < testData.length; i++) {
           const data = testData[i];
           const suffix = Math.random().toString(36).substring(2, 8);
-          const uniqueLogin = data.login + "_" + suffix;
-          const uniquePassword = data.password + "_" + suffix;
-          const uniqueEmail = suffix + "_" + data.email;
+          const uniqueLogin = data.login + suffix;
+          const uniquePassword = data.password + suffix;
+          const uniqueEmail = suffix + data.email;
 
           console.log(`\n📦 Dataset ${i + 1}/${testData.length} (${data.note}): login=${uniqueLogin}, email=${uniqueEmail}, firstName=${data.firstName}, lastName=${data.lastName}, secondName=${data.secondName}, expected status=${data.cod}`);
 
