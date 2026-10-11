@@ -1,0 +1,11 @@
+info:
+  name: Пользователи
+  type: folder
+  seq: 2
+
+request:
+  auth: inherit
+
+docs:
+  content: Регистрация, чтение, обновление и удаление пользователей
+  type: text/markdown

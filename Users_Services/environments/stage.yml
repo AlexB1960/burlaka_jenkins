@@ -2,7 +2,6 @@ name: stage
 variables:
   - name: baseUrl
     value: https://users.dev.practic.ordocrm.online
-    description: ""
   - name: regexLogin
     value: ^[a-z0-9]{3,30}$
     description: Регулярка для login

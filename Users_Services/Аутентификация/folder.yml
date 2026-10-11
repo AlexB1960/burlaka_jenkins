@@ -1,0 +1,11 @@
+info:
+  name: Аутентификация
+  type: folder
+  seq: 1
+
+request:
+  auth: inherit
+
+docs:
+  content: Вход в систему и работа с токенами
+  type: text/markdown

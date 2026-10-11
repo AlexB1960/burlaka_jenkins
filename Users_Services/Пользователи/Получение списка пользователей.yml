@@ -1,0 +1,81 @@
+info:
+  name: Получение списка пользователей
+  type: http
+  seq: 15
+  tags:
+    - Пользователи
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/user"
+  params:
+    - name: page
+      value: "1"
+      type: query
+    - name: size
+      value: "10"
+      type: query
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: 200 Response
+    description: OK
+    request:
+      url: "{{baseUrl}}/api/user"
+      method: GET
+      params:
+        - name: page
+          value: "1"
+          type: query
+        - name: size
+          value: "10"
+          type: query
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: "*/*"
+      body:
+        type: text
+        data: |-
+          {
+            "message": "",
+            "status": "OK",
+            "payload": {
+              "page": 0,
+              "pageCount": 0,
+              "countOnPage": 0,
+              "users": [
+                {
+                  "id": "",
+                  "login": "",
+                  "email": "",
+                  "fio": {
+                    "firstName": "",
+                    "lastName": "",
+                    "secondName": ""
+                  }
+                }
+              ]
+            }
+          }
+
+docs: |
+  Возвращает пользователей постранично. Удалённые пользователи в выборку не попадают.
+
+  Параметры запроса:
+  - page — номер страницы, нумерация с 1 (по умолчанию 1).
+  - size — количество пользователей на странице (по умолчанию 10).
+
+  Ответы:
+  - 200 — страница пользователей: в payload список users, номер запрошенной страницы page,
+  общее количество страниц pageCount и размер страницы countOnPage.
+  - 400 — page меньше 1.

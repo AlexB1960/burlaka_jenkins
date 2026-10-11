@@ -1,0 +1,97 @@
+info:
+  name: Регистрация пользователя
+  type: http
+  seq: 21
+  tags:
+    - Пользователи
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/user/register"
+  body:
+    type: json
+    data: |-
+      {
+        "user": {
+          "login": "",
+          "password": "",
+          "email": "",
+          "fio": {
+            "firstName": "",
+            "lastName": "",
+            "secondName": ""
+          }
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: 200 Response
+    description: OK
+    request:
+      url: "{{baseUrl}}/api/user/register"
+      method: POST
+      body:
+        type: json
+        data: |-
+          {
+            "user": {
+              "login": "",
+              "password": "",
+              "email": "",
+              "fio": {
+                "firstName": "",
+                "lastName": "",
+                "secondName": ""
+              }
+            }
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: "*/*"
+      body:
+        type: text
+        data: |-
+          {
+            "message": "",
+            "status": "OK",
+            "payload": {
+              "user": {
+                "id": "",
+                "login": "",
+                "email": "",
+                "fio": {
+                  "firstName": "",
+                  "lastName": "",
+                  "secondName": ""
+                }
+              }
+            }
+          }
+
+docs: |
+  Создаёт нового пользователя.
+
+  Требования к полям:
+  - login — обязателен. Пробелы по краям обрезаются, значение приводится к нижнему регистру, допускаются только латинские буквы и цифры ([a-z0-9]). Логин уникален.
+  - password — обязателен. Хранится в виде BCrypt-хэша и в ответе не возвращается.
+  - email — обязателен. Пробелы по краям обрезаются, проверяется формат и уникальность.
+  - fio.firstName, fio.lastName — обязательны, не могут быть пустыми после обрезки пробелов. Сохраняются обрезанными.
+  - fio.secondName — необязателен.
+
+  Пользователь создаётся со статусом INACTIVE.
+
+  Ответы:
+  - 201 — пользователь создан; в payload возвращаются id, login, email и ФИО.
+  - 400 — логин или email пустые; логин содержит недопустимые символы; логин или email
+  уже заняты; некорректный формат email; имя или фамилия пустые.

@@ -1,0 +1,65 @@
+info:
+  name: Получение пользователя по id
+  type: http
+  seq: 8
+  tags:
+    - Пользователи
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/user/:id"
+  params:
+    - name: id
+      value: ""
+      type: path
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: 200 Response
+    description: OK
+    request:
+      url: "{{baseUrl}}/api/user/:id"
+      method: GET
+      params:
+        - name: id
+          value: ""
+          type: path
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: "*/*"
+      body:
+        type: text
+        data: |-
+          {
+            "message": "",
+            "status": "OK",
+            "payload": {
+              "user": {
+                "id": "",
+                "login": "",
+                "email": "",
+                "fio": {
+                  "firstName": "",
+                  "lastName": "",
+                  "secondName": ""
+                }
+              }
+            }
+          }
+
+docs: |
+  Возвращает пользователя по его идентификатору.
+
+  Ответы:
+  - 200 — пользователь найден; в payload возвращаются id, login, email и ФИО.
+  - 404 — пользователь не найден, в том числе если он был удалён.

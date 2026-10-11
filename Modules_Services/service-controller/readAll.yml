@@ -78,12 +78,11 @@ examples:
             "data": {
               "totalElements": 0,
               "totalPages": 0,
-              "numberOfElements": 0,
               "pageable": {
                 "pageNumber": 0,
-                "unpaged": false,
                 "paged": false,
                 "pageSize": 0,
+                "unpaged": false,
                 "offset": 0,
                 "sort": [
                   {
@@ -95,6 +94,7 @@ examples:
                   }
                 ]
               },
+              "numberOfElements": 0,
               "size": 0,
               "content": [
                 {

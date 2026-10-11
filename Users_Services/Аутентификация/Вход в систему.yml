@@ -1,0 +1,78 @@
+info:
+  name: Вход в систему
+  type: http
+  seq: 4
+  tags:
+    - Аутентификация
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/auth/login"
+  body:
+    type: json
+    data: |-
+      {
+        "login": "",
+        "password": ""
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: 200 Response
+    description: OK
+    request:
+      url: "{{baseUrl}}/api/auth/login"
+      method: POST
+      body:
+        type: json
+        data: |-
+          {
+            "login": "",
+            "password": ""
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: "*/*"
+      body:
+        type: text
+        data: |-
+          {
+            "message": "",
+            "status": "OK",
+            "payload": {
+              "accessToken": {
+                "value": ""
+              },
+              "refreshToken": {
+                "value": ""
+              }
+            }
+          }
+
+docs: |
+  Проверяет логин и пароль и возвращает пару токенов.
+
+  Требования к полям:
+  - login — обязателен. Пробелы по краям обрезаются, регистр не важен.
+  - password — обязателен.
+
+  Ограничение перебора: не более 5 неудачных попыток за 15 минут на логин, после чего вход отклоняется до истечения окна. Попытки для несуществующих логинов учитываются так же, как для существующих.
+
+  Ответы:
+  - 200 — вход выполнен; в payload accessToken (JWT, RS256, 15 минут) и
+  refreshToken (256 бит случайности, 30 дней).
+  - 401 — неверные логин или пароль, а также исчерпанный лимит попыток.
+  Ответ во всех этих случаях одинаковый, чтобы по нему нельзя было
+  определить, существует ли аккаунт.
+  - 403 — учётные данные верны, но аккаунт не активен (статус INACTIVE
+  или BANNED).

@@ -1,0 +1,62 @@
+info:
+  name: Текущий пользователь
+  type: http
+  seq: 1
+  tags:
+    - Аутентификация
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/auth/me"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: 200 Response
+    description: OK
+    request:
+      url: "{{baseUrl}}/api/auth/me"
+      method: GET
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: "*/*"
+      body:
+        type: text
+        data: |-
+          {
+            "message": "",
+            "status": "OK",
+            "payload": {
+              "user": {
+                "id": "",
+                "login": "",
+                "email": "",
+                "fio": {
+                  "firstName": "",
+                  "lastName": "",
+                  "secondName": ""
+                }
+              }
+            }
+          }
+
+docs: |
+  Возвращает данные пользователя, которому принадлежит предъявленный access токен.
+
+  Пользователь определяется по заголовку Authorization: Bearer <access токен>.
+
+  Ответы:
+  - 200 — в payload данные пользователя.
+  - 401 — заголовок не передан, токен недействителен или просрочен, либо
+  пользователь не найден (в том числе мягко удалён). Во всех случаях клиенту
+  нужно аутентифицироваться заново.
+  - 403 — токен верен, но аккаунт не активен (статус INACTIVE или BANNED).

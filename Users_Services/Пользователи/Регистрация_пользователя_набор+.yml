@@ -1,0 +1,198 @@
+info:
+  name: Регистрация_пользователя_набор+
+  type: http
+  seq: 22
+  tags:
+    - Пользователи
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/user"
+  body:
+    type: json
+    data: ""
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        const baseURL = bru.getEnvVar('baseUrl');
+
+        function assertStatus(idx, expected, note, actual) {
+          test(`Dataset ${idx}: status ${expected} (${note})`, function() {
+            expect(actual).to.equal(expected);
+          });
+        }
+
+        function assertUserId(idx, userId) {
+          test(`Dataset ${idx}: ID is received from response`, function() {
+            expect(userId).to.not.be.undefined;
+            expect(userId).to.not.be.null;
+          });
+        }
+
+        const testData = [
+          { note: "firstName = 1 sign", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "I", lastName: "Ivanov", secondName: "Ivanovich", cod: 201 },
+          { note: "firstName = 2 signs", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Pe", lastName: "Petrov", secondName: "Petrovich", cod: 201 },
+          { note: "lastName = 1 sign", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Sidor", lastName: "S", secondName: "Sidorovich", cod: 201 },
+          { note: "lastName = 2 signs", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Sidor", lastName: "Si", secondName: "Sidorovich", cod: 201 },
+          { note: "secondName = empty", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Fedor", lastName: "Fedorov", secondName: "", cod: 201 }
+        ];
+
+        console.log(`🚀 Start ${testData.length} positive datasets...`);
+
+        let passed = 0;
+        let failed = 0;
+
+        for (let i = 0; i < testData.length; i++) {
+          const data = testData[i];
+          const suffix = Math.random().toString(36).substring(2, 8);
+          const uniqueLogin = data.login + suffix;
+          const uniquePassword = data.password + suffix;
+          const uniqueEmail = suffix + data.email;
+
+          console.log(`\n📦 Dataset ${i + 1}/${testData.length} (${data.note}): login=${uniqueLogin}, email=${uniqueEmail}, firstName=${data.firstName}, lastName=${data.lastName}, secondName=${data.secondName}, expected status=${data.cod}`);
+
+          const requestBody = {
+            user: {
+              login: uniqueLogin,
+              password: uniquePassword,
+              email: uniqueEmail,
+              fio: {
+                firstName: data.firstName,
+                lastName: data.lastName,
+                secondName: data.secondName
+              }
+            }
+          };
+
+          let actualStatus = null;
+          let userId = null;
+
+          try {
+            const res = await bru.sendRequest({
+              method: 'POST',
+              url: `${baseURL}/api/user/register`,
+              headers: { 'Content-Type': 'application/json' },
+              data: requestBody,
+              timeout: 10000
+            });
+            actualStatus = res.status;
+            userId = res.data?.payload?.user?.id;
+          } catch (err) {
+            actualStatus = err.response?.status || err.status || null;
+            userId = err.response?.data?.payload?.user?.id;
+          }
+
+          assertStatus(i + 1, data.cod, data.note, actualStatus);
+          assertUserId(i + 1, userId);
+
+          if (actualStatus === data.cod && userId) {
+            console.log(`✅ Dataset ${i + 1}: user is created ID=${userId} (received status ${actualStatus})`);
+            passed++;
+          } else {
+            console.log(`❌ Dataset ${i + 1}: failed — received status ${actualStatus}, userId=${userId}`);
+            failed++;
+          }
+
+          if (userId) {
+            try {
+              const delRes = await bru.sendRequest({
+                method: 'DELETE',
+                url: `${baseURL}/api/user/${userId}`,
+                headers: { 'Content-Type': 'application/json' },
+                timeout: 5000
+              });
+              console.log(`🧹 Dataset ${i + 1}: user ${userId} is deleted (status ${delRes.status}).`);
+            } catch (err) {
+              const delStatus = err.response?.status || err.status || 'unknown';
+              if (delStatus === 404) {
+                console.log(`🧹 Dataset ${i + 1}: user ${userId} has already deleted (404).`);
+              } else {
+                console.warn(`⚠️ Dataset ${i + 1}: user could not be deleted ${userId} (status ${delStatus}): ${err.message}`);
+              }
+            }
+          }
+        }
+
+        console.log(`\n${'='.repeat(50)}`);
+        console.log(`📊 Total: ${passed} passed, ${failed} failed from ${testData.length} datasets`);
+        console.log(`${'='.repeat(50)}`);
+
+        if (failed > 0) {
+          test(`Total: ${failed} failed from ${testData.length} datasets`, function() {
+            expect.fail(`${failed} failed from ${testData.length} datasets`);
+          });
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: 200 Response
+    description: OK
+    request:
+      url: "{{baseUrl}}/api/user/register"
+      method: POST
+      body:
+        type: json
+        data: |-
+          {
+            "user": {
+              "login": "",
+              "password": "",
+              "email": "",
+              "fio": {
+                "firstName": "",
+                "lastName": "",
+                "secondName": ""
+              }
+            }
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: "*/*"
+      body:
+        type: text
+        data: |-
+          {
+            "message": "",
+            "status": "OK",
+            "payload": {
+              "user": {
+                "id": "",
+                "login": "",
+                "email": "",
+                "fio": {
+                  "firstName": "",
+                  "lastName": "",
+                  "secondName": ""
+                }
+              }
+            }
+          }
+
+docs: |
+  Создаёт нового пользователя.
+
+  Требования к полям:
+  - login — обязателен. Пробелы по краям обрезаются, значение приводится к нижнему регистру, допускаются только латинские буквы и цифры ([a-z0-9]). Логин уникален.
+  - password — обязателен. Хранится в виде BCrypt-хэша и в ответе не возвращается.
+  - email — обязателен. Пробелы по краям обрезаются, проверяется формат и уникальность.
+  - fio.firstName, fio.lastName — обязательны, не могут быть пустыми после обрезки пробелов. Сохраняются обрезанными.
+  - fio.secondName — необязателен.
+
+  Пользователь создаётся со статусом INACTIVE.
+
+  Ответы:
+  - 201 — пользователь создан; в payload возвращаются id, login, email и ФИО.
+  - 400 — логин или email пустые; логин содержит недопустимые символы; логин или email
+  уже заняты; некорректный формат email; имя или фамилия пустые.

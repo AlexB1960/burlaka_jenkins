@@ -1,0 +1,157 @@
+info:
+  name: Получение_пользователя_по_email_200
+  type: http
+  seq: 6
+  tags:
+    - Пользователи
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/user/email/:email"
+  params:
+    - name: email
+      value: "{{testUserEmail}}"
+      type: path
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        const baseURL = bru.getEnvVar('baseUrl');
+
+        const suffix = Math.random().toString(36).substring(2, 8);
+        const userData = {
+          "user": {
+            "login": "testLogin" + suffix,
+            "password": "testPassword" + suffix,
+            "email": "test" + suffix + "@mail.ru",
+            "fio": {
+              "firstName": "testName_ByEmail",
+              "lastName": "testLastname_ByEmail",
+              "secondName": "testSecondname_ByEmail"
+            }
+          }
+        };
+
+        const resNew = await bru.sendRequest({
+          method: 'POST',
+          url: `${baseURL}/api/user/register`,
+          headers: { 'Content-Type': 'application/json' },
+          data: userData,
+          timeout: 10000
+        });
+
+        if (resNew.status === 201) {
+          const newId = resNew.data?.payload?.user?.id || resNew.data?.id || resNew.body?.payload?.user?.id;
+          if (!newId) throw new Error('It was impossible to get ID from response');
+          const newEmail = resNew.data?.payload?.user?.email || resNew.data?.email || resNew.body?.payload?.user?.email;
+          if (!newEmail) throw new Error('It was impossible to get Email from response');
+          
+          bru.setVar('testByEmailUserId', newId);
+          bru.setVar('testUserEmail', newEmail);
+        } else {
+          throw new Error(`Error creating user: status ${resNew.status}`);
+        }
+    - type: tests
+      code: |-
+        test("Status cod = 200", function () {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("Status text = OK", function () {
+            const body = res.getBody();
+            expect(body.status).to.equal("OK");
+        });
+
+        const fio = res.body.payload.user.fio;
+        test("Field firstName = testName_ByEmail", function () {
+          expect(fio.firstName).to.equal("testName_ByEmail");
+        });
+
+        test("Field lastName = testLastname_ByEmail", function () {
+          expect(fio.lastName).to.equal("testLastname_ByEmail");
+        });
+
+        test("Field secondName = testSecondname_ByEmail", function () {
+          expect(fio.secondName).to.equal("testSecondname_ByEmail");
+        });
+
+
+        const baseURL = bru.getEnvVar('baseUrl');
+        const userId = bru.getVar('testByEmailUserId');
+
+        if (!userId) {
+          console.log('⚠️ Post-response: testUserId is not found. Perhaps the Pre-request didn’t work.');
+          return;
+        }
+
+        try {
+          const deleteRes = await bru.sendRequest({
+            method: 'DELETE',
+            url: `${baseURL}/api/user/${userId}`,
+            headers: { 'Content-Type': 'application/json' },
+            timeout: 5000
+          });
+
+          if ([200, 204].includes(deleteRes.status)) {
+            bru.deleteVar('testByEmailUserId');
+            bru.deleteVar('testUserEmail');
+          } else if (deleteRes.status === 404) {
+            console.warn(`⚠️ User ${userId} is not found (It may have been deleted earlier).`);
+          } else {
+            console.warn(`⚠️ Server returns the status ${deleteRes.status} when removing.`);
+          }
+        } catch (err) {
+          console.error(`💥 Critical error during deletion: ${err.message}`);
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: 200 Response
+    description: OK
+    request:
+      url: "{{baseUrl}}/api/user/email/:email"
+      method: GET
+      params:
+        - name: email
+          value: ""
+          type: path
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: "*/*"
+      body:
+        type: text
+        data: |-
+          {
+            "message": "",
+            "status": "OK",
+            "payload": {
+              "user": {
+                "id": "",
+                "login": "",
+                "email": "",
+                "fio": {
+                  "firstName": "",
+                  "lastName": "",
+                  "secondName": ""
+                }
+              }
+            }
+          }
+
+docs: |
+  Возвращает пользователя по email. Совпадение точное: регистр и пробелы не нормализуются.
+
+  Ответы:
+  - 200 — пользователь найден; в payload возвращаются id, login, email и ФИО.
+  - 404 — пользователь не найден, в том числе если он был удалён.
