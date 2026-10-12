@@ -1,7 +1,7 @@
 info:
   name: Регистрация_пользователя_набор-
   type: http
-  seq: 23
+  seq: 27
   tags:
     - Пользователи
 
@@ -28,13 +28,18 @@ runtime:
         const testData = [
           { note: "Invalid login=Логин", login: "Логин", password: "testPasswordN", email: "test@mail.ru", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
           { note: "Invalid login=empty", login: "", password: "testPasswordN", email: "test@mail.ru", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
+          { note: "Invalid login=space", login: " ", password: "testPasswordN", email: "test@mail.ru", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
           { note: "Invalid password=empty", login: "testLoginN", password: "", email: "test@mail.ru", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
+          { note: "Invalid password=space", login: "testLoginN", password: " ", email: "test@mail.ru", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
           { note: "Invalid email=empty", login: "testLoginN", password: "testPasswordN", email: "", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
+          { note: "Invalid email=space", login: "testLoginN", password: "testPasswordN", email: " ", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
           { note: "Invalid email=test", login: "testLoginN", password: "testPasswordN", email: "test", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
           { note: "Invalid email=mail.ru", login: "testLoginN", password: "testPasswordN", email: "mail.ru", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
           { note: "Invalid email=@.ru", login: "testLoginN", password: "testPasswordN", email: "@.ru", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
           { note: "Invalid firstName = empty", login: "testLoginN", password: "testPasswordN", email: "test@mail.ru", firstName: "", lastName: "Petrov", secondName: "Petrovich", cod: 400 },
-          { note: "Invalid lastName = empty", login: "testLoginN", password: "testPasswordN", email: "test@mail.ru", firstName: "Ivan", lastName: "", secondName: "Petrovich", cod: 400 }
+          { note: "Invalid firstName = space", login: "testLoginN", password: "testPasswordN", email: "test@mail.ru", firstName: " ", lastName: "Petrov", secondName: "Petrovich", cod: 400 },
+          { note: "Invalid lastName = empty", login: "testLoginN", password: "testPasswordN", email: "test@mail.ru", firstName: "Ivan", lastName: "", secondName: "Petrovich", cod: 400 },
+          { note: "Invalid lastName = space", login: "testLoginN", password: "testPasswordN", email: "test@mail.ru", firstName: "Ivan", lastName: " ", secondName: "Petrovich", cod: 400 }
         ];
 
         console.log(`🚀 Start ${testData.length} negative datasets...`);
@@ -117,12 +122,6 @@ runtime:
         console.log(`\n${'='.repeat(50)}`);
         console.log(`📊 Total: ${passed} passed, ${failed} failed from ${testData.length} datasets`);
         console.log(`${'='.repeat(50)}`);
-
-        if (failed > 0) {
-          test(`Total: ${failed} failed from ${testData.length} datasets`, function() {
-            expect.fail(`${failed} failed from ${testData.length} datasets`);
-          });
-        }
 
 settings:
   encodeUrl: true

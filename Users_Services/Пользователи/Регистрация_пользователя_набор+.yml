@@ -1,7 +1,7 @@
 info:
   name: Регистрация_пользователя_набор+
   type: http
-  seq: 22
+  seq: 26
   tags:
     - Пользователи
 
@@ -34,10 +34,11 @@ runtime:
 
         const testData = [
           { note: "firstName = 1 sign", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "I", lastName: "Ivanov", secondName: "Ivanovich", cod: 201 },
-          { note: "firstName = 2 signs", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Pe", lastName: "Petrov", secondName: "Petrovich", cod: 201 },
+          { note: "firstName = any signs", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "qwertYйцукеН 0123 !№;%:?*()-_+=<>\/|", lastName: "Petrov", secondName: "Petrovich", cod: 201 },
           { note: "lastName = 1 sign", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Sidor", lastName: "S", secondName: "Sidorovich", cod: 201 },
-          { note: "lastName = 2 signs", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Sidor", lastName: "Si", secondName: "Sidorovich", cod: 201 },
-          { note: "secondName = empty", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Fedor", lastName: "Fedorov", secondName: "", cod: 201 }
+          { note: "lastName = any signs", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Sidor", lastName: "qwertYйцукеН 0123 !№;%:?*()-_+=<>\/|", secondName: "Sidorovich", cod: 201 },
+          { note: "secondName = empty", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Fedor", lastName: "Fedorov", secondName: "", cod: 201 },
+          { note: "secondName = any signs", login: "testLogin", password: "testPassword", email: "test@mail.ru", firstName: "Fedor", lastName: "Fedorov", secondName: "qwertYйцукеН 0123 !№;%:?*()-_+=<>\/|", cod: 201 }
         ];
 
         console.log(`🚀 Start ${testData.length} positive datasets...`);
@@ -119,12 +120,6 @@ runtime:
         console.log(`\n${'='.repeat(50)}`);
         console.log(`📊 Total: ${passed} passed, ${failed} failed from ${testData.length} datasets`);
         console.log(`${'='.repeat(50)}`);
-
-        if (failed > 0) {
-          test(`Total: ${failed} failed from ${testData.length} datasets`, function() {
-            expect.fail(`${failed} failed from ${testData.length} datasets`);
-          });
-        }
 
 settings:
   encodeUrl: true

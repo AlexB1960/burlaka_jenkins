@@ -1,0 +1,161 @@
+info:
+  name: Обновление_данных_пользователя_400_lastName
+  type: http
+  seq: 21
+  tags:
+    - Пользователи
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/user/:id"
+  params:
+    - name: id
+      value: "{{testUpdateUserId}}"
+      type: path
+  body:
+    type: json
+    data: |-
+      {
+        "password": "ChangedPassword",
+        "fio": {
+          "firstName": "ChangedFirstName",
+          "lastName": "",
+          "secondName": "ChangedSecondtName"
+        }
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        const baseURL = bru.getEnvVar('baseUrl');
+
+        const suffix = Math.random().toString(36).substring(2, 8);
+        const userData = {
+          "user": {
+            "login": "testLogin" + suffix,
+            "password": "testPassword" + suffix,
+            "email": "test" + suffix + "@mail.ru",
+            "fio": {
+              "firstName": "testName",
+              "lastName": "testLastname",
+              "secondName": "testSecondname"
+            }
+          }
+        };
+
+        const resNew = await bru.sendRequest({
+          method: 'POST',
+          url: `${baseURL}/api/user/register`,
+          headers: { 'Content-Type': 'application/json' },
+          data: userData,
+          timeout: 10000
+        });
+
+        if (resNew.status === 201) {
+          const newId = resNew.data?.payload?.user?.id || resNew.data?.id || resNew.body?.payload?.user?.id;
+          if (!newId) throw new Error('It was impossible to get ID from response');
+          
+          bru.setVar('testUpdateUserId', newId);
+        } else {
+          throw new Error(`Error creating user: status ${resNew.status}`);
+        }
+    - type: tests
+      code: |-
+        test("Status cod = 400", function () {
+          expect(res.getStatus()).to.equal(400);
+        });
+
+        test("Status text = BAD_REQUEST", function () {
+            const body = res.getBody();
+            expect(body.status).to.equal("BAD_REQUEST");
+        });
+
+        const baseURL = bru.getEnvVar('baseUrl');
+        const userId = bru.getVar('testUpdateUserId');
+
+        try {
+          await bru.sendRequest({
+            method: 'DELETE',
+            url: `${baseURL}/api/user/${userId}`,
+            headers: { 'Content-Type': 'application/json' },
+            timeout: 5000
+          });
+          //console.log('🧹 Тестовый пользователь удалён');
+        } catch (err) {
+          console.error('⚠️ Ошибка очистки:', err.message);
+        }
+
+        bru.deleteVar('testUpdateUserId');
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: 200 Response
+    description: OK
+    request:
+      url: "{{baseUrl}}/api/user/:id"
+      method: PATCH
+      params:
+        - name: id
+          value: ""
+          type: path
+      body:
+        type: json
+        data: |-
+          {
+            "password": "",
+            "fio": {
+              "firstName": "",
+              "lastName": "",
+              "secondName": ""
+            }
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: "*/*"
+      body:
+        type: text
+        data: |-
+          {
+            "message": "",
+            "status": "OK",
+            "payload": {
+              "user": {
+                "id": "",
+                "login": "",
+                "email": "",
+                "fio": {
+                  "firstName": "",
+                  "lastName": "",
+                  "secondName": ""
+                }
+              }
+            }
+          }
+
+docs: |
+  Частично обновляет данные пользователя: переданные поля перезаписываются,
+  отсутствующие (null) — остаются без изменений.
+
+  Обновляемые поля:
+  - password — если передан, не может быть пустым после обрезки пробелов;
+  сохраняется в виде BCrypt-хэша.
+  - fio.firstName, fio.lastName — если переданы, не могут быть пустыми после обрезки пробелов; сохраняются обрезанными.
+  - fio.secondName — если передан, сохраняется как есть.
+
+  Логин и email этим эндпоинтом не изменяются.
+
+  Ответы:
+  - 200 — пользователь обновлён; в payload возвращаются id, login, email и ФИО.
+  - 400 — переданные пароль, имя или фамилия пустые.
+  - 404 — пользователь с указанным id не найден, в том числе если он был удалён.
