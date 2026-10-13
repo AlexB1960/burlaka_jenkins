@@ -18,6 +18,7 @@ runtime:
   scripts:
     - type: before-request
       code: |-
+        // Создание нового тестового пользователя
         const baseURL = bru.getEnvVar('baseUrl');
 
         const suffix = Math.random().toString(36).substring(2, 8);
@@ -44,14 +45,15 @@ runtime:
 
         if (resNew.status === 201) {
           const newId = resNew.data?.payload?.user?.id || resNew.data?.id || resNew.body?.payload?.user?.id;
-          if (!newId) throw new Error('It was impossible to get ID from response');
+          if (!newId) throw new Error('Невозможно извлечь ID из полученного response');
           
           bru.setVar('testDeliteUserId', newId);
         } else {
-          throw new Error(`Error creating user: status ${resNew.status}`);
+          throw new Error(`Ошибка создания тестового пользователя: статус ${resNew.status}`);
         }
     - type: tests
       code: |-
+        // 1. Проверяем код выполнения DELETE
         test("Status cod = 200", function () {
           expect(res.getStatus()).to.equal(200);
         });
@@ -61,6 +63,7 @@ runtime:
             expect(body.status).to.equal("OK");
         });
 
+        // 2. Отправляем GET, чтобы убедиться, что пользователя нет
         const baseURL = bru.getEnvVar('baseUrl');
         const userId = bru.getVar('testDeliteUserId');
         let checkRes;
@@ -72,10 +75,12 @@ runtime:
             timeout: 5000
           });
         } catch (err) {
+          // Axios бросает исключение на 404 — ловим и достаём response из ошибки
           checkRes = err.response || { status: err.status || null };
         }
 
-        test('User is removed from DB (GET returns 404)', function() {
+        // 3. Проверяем, что сервер ответил 404 (пользователь не найден)
+        test('Пользователь удалён из БД (GET вернул 404)', function() {
           expect(checkRes.status).to.equal(404);
         });
 

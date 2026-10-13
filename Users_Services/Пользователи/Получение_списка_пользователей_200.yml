@@ -30,18 +30,20 @@ runtime:
           expect(body.status).to.equal("OK");
         });
 
-        test("All users in list have valid and non-empty fields", function () {
+        test("Все пользователи в списке имеют валидные и непустые поля", function () {
           const body = res.getBody();
           const users = body.payload?.users;
 
+          // Проверяем, что users — массив
           expect(users, "Field 'users' should be an array").to.not.be.undefined;
           expect(Array.isArray(users), "Field 'users' should be an array").to.be.true;
 
           if (users.length === 0) {
-            console.warn("⚠️ The users list is empty. Field validation will be skipped.");
+            console.warn("⚠️ Список пользователей пустой. Валидация полей будет пропущена.");
             return;
           }
 
+          // Защита от отсутствующих regex-переменных
           const emailRegexStr = bru.getEnvVar('regexEmail');
           const loginRegexStr = bru.getEnvVar('regexLogin');
 
@@ -52,22 +54,23 @@ runtime:
           const emailRegex = new RegExp(emailRegexStr);
           const loginRegex = new RegExp(loginRegexStr);
 
-          console.log(`🔍 Checking fields validity for ${users.length} users...`);
+          console.log(`🔍 Проверка валидности полей у ${users.length} пользователей...`);
 
+          // Сборщик ошибок — проверяем ВСЕХ пользователей, не останавливаемся на первом
           const errors = [];
           users.forEach((user, index) => {
             const fio = user.fio;
 
             if (!fio) {
-              errors.push(`User [${index}]: fio object is missing.`);
+              errors.push(`Пользователь [${index}]: объект fio отсутствует.`);
               return;
             }
 
             if (!fio.firstName || fio.firstName.trim() === "") {
-              errors.push(`User [${index}]: firstName is empty.`);
+              errors.push(`Пользователь [${index}]: поле firstName пустое.`);
             }
             if (!fio.lastName || fio.lastName.trim() === "") {
-              errors.push(`User [${index}]: lastName is empty.`);
+              errors.push(`Пользователь [${index}]: поле lastName пустоте.`);
             }
             if (!fio.secondName || fio.secondName.trim() === "") {
               //errors.push(`User [${index}]: secondName is empty.`);
@@ -75,29 +78,30 @@ runtime:
 
             const login = user.login;
             if (typeof login !== "string" || login.trim() === "") {
-              errors.push(`User [${index}]: login is missing or empty.`);
+              errors.push(`Пользователь [${index}]: login отсутствует или пустой.`);
             } else if (!loginRegex.test(login)) {
-              errors.push(`User [${index}]: incorrect login format '${login}'.`);
+              errors.push(`Пользователь [${index}]: неверный формат login '${login}'.`);
             }
 
             const email = user.email;
             if (typeof email !== "string" || email.trim() === "") {
-              errors.push(`User [${index}]: email is missing or empty.`);
+              errors.push(`Пользователь [${index}]: email отсутствует или пустой.`);
             } else if (!emailRegex.test(email)) {
-              errors.push(`User [${index}]: incorrect email format '${email}'.`);
+              errors.push(`Пользователь [${index}]: неверный формат email '${email}'.`);
             }
 
-            if (errors.length === 0 || errors.every(e => !e.startsWith(`User [${index}]`))) {
-              console.log(`✅ User [${index}] is checked: FIO, login, email — OK.`);
+            if (errors.length === 0 || errors.every(e => !e.startsWith(`Пользователь [${index}]`))) {
+              console.log(`✅ Пользователь [${index}] проверен: ФИО, login, email — OK.`);
             }
           });
 
+          // Если есть ошибки — показываем все сразу и роняем тест
           if (errors.length > 0) {
             const message = errors.join("\n");
-            expect.fail(`❌ ${errors.length} error(s) found:\n${message}`);
+            expect.fail(`❌ Обнаружены ${errors.length} ошибки:\n${message}`);
           }
 
-          console.log(`✅ All ${users.length} users checked — all fields are valid!`);
+          console.log(`✅ Все ${users.length} пользователей проверены — все поля валидные!`);
         });
 
 settings:

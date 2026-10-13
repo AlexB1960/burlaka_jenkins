@@ -18,6 +18,7 @@ runtime:
   scripts:
     - type: before-request
       code: |-
+        // Создание нового тестового пользователя с testUserEmail
         const baseURL = bru.getEnvVar('baseUrl');
 
         const suffix = Math.random().toString(36).substring(2, 8);
@@ -44,14 +45,14 @@ runtime:
 
         if (resNew.status === 201) {
           const newId = resNew.data?.payload?.user?.id || resNew.data?.id || resNew.body?.payload?.user?.id;
-          if (!newId) throw new Error('It was impossible to get ID from response');
+          if (!newId) throw new Error('Невозможно извлечь ID из полученного response');
           const newEmail = resNew.data?.payload?.user?.email || resNew.data?.email || resNew.body?.payload?.user?.email;
-          if (!newEmail) throw new Error('It was impossible to get Email from response');
+          if (!newEmail) throw new Error('Невозможно извлечь email из полученного response');
           
           bru.setVar('testByEmailUserId', newId);
           bru.setVar('testUserEmail', newEmail);
         } else {
-          throw new Error(`Error creating user: status ${resNew.status}`);
+          throw new Error(`Ошибка создания тестового пользователя: статус ${resNew.status}`);
         }
     - type: tests
       code: |-
@@ -77,12 +78,12 @@ runtime:
           expect(fio.secondName).to.equal("testSecondname_ByEmail");
         });
 
-
+        // Удаление тестового пользователя
         const baseURL = bru.getEnvVar('baseUrl');
         const userId = bru.getVar('testByEmailUserId');
 
         if (!userId) {
-          console.log('⚠️ Post-response: testUserId is not found. Perhaps the Pre-request didn’t work.');
+          console.log('⚠️ Post-response: Не найден testUserId. Возможно, что не сработал Pre-request.');
           return;
         }
 
@@ -98,12 +99,12 @@ runtime:
             bru.deleteVar('testByEmailUserId');
             bru.deleteVar('testUserEmail');
           } else if (deleteRes.status === 404) {
-            console.warn(`⚠️ User ${userId} is not found (It may have been deleted earlier).`);
+            console.warn(`⚠️ Пользователь ${userId} не найден (Возможно, он был удален раньше).`);
           } else {
-            console.warn(`⚠️ Server returns the status ${deleteRes.status} when removing.`);
+            console.warn(`⚠️ Сервер вернул статус ${deleteRes.status} при удалении.`);
           }
         } catch (err) {
-          console.error(`💥 Critical error during deletion: ${err.message}`);
+          console.error(`💥 Критическая ошибка при удалении: ${err.message}`);
         }
 
 settings:

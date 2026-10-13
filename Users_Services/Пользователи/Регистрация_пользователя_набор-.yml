@@ -19,30 +19,32 @@ runtime:
       code: |-
         const baseURL = bru.getEnvVar('baseUrl');
 
+        // --- Хелпер для тестов (вне цикла) ---
         function assertStatus(idx, expected, note, actual) {
-          test(`Dataset ${idx}: status ${expected} (${note})`, function() {
+          test(`Набор ${idx}: статус ${expected} (${note})`, function() {
             expect(actual).to.equal(expected);
           });
         }
 
+        // Наборы негативных тестовых данных
         const testData = [
-          { note: "Invalid login=Логин", login: "Логин", password: "testPasswordN", email: "test@mail.ru", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
-          { note: "Invalid login=empty", login: "", password: "testPasswordN", email: "test@mail.ru", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
-          { note: "Invalid login=space", login: " ", password: "testPasswordN", email: "test@mail.ru", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
-          { note: "Invalid password=empty", login: "testLoginN", password: "", email: "test@mail.ru", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
-          { note: "Invalid password=space", login: "testLoginN", password: " ", email: "test@mail.ru", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
-          { note: "Invalid email=empty", login: "testLoginN", password: "testPasswordN", email: "", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
-          { note: "Invalid email=space", login: "testLoginN", password: "testPasswordN", email: " ", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
-          { note: "Invalid email=test", login: "testLoginN", password: "testPasswordN", email: "test", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
-          { note: "Invalid email=mail.ru", login: "testLoginN", password: "testPasswordN", email: "mail.ru", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
-          { note: "Invalid email=@.ru", login: "testLoginN", password: "testPasswordN", email: "@.ru", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
-          { note: "Invalid firstName = empty", login: "testLoginN", password: "testPasswordN", email: "test@mail.ru", firstName: "", lastName: "Petrov", secondName: "Petrovich", cod: 400 },
-          { note: "Invalid firstName = space", login: "testLoginN", password: "testPasswordN", email: "test@mail.ru", firstName: " ", lastName: "Petrov", secondName: "Petrovich", cod: 400 },
-          { note: "Invalid lastName = empty", login: "testLoginN", password: "testPasswordN", email: "test@mail.ru", firstName: "Ivan", lastName: "", secondName: "Petrovich", cod: 400 },
-          { note: "Invalid lastName = space", login: "testLoginN", password: "testPasswordN", email: "test@mail.ru", firstName: "Ivan", lastName: " ", secondName: "Petrovich", cod: 400 }
+          { note: "Невалидный login=Логин", login: "Логин", password: "testPasswordN", email: "test@mail.ru", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
+          { note: "Невалидный login=пустой", login: "", password: "testPasswordN", email: "test@mail.ru", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
+          { note: "Невалидный login=пробел", login: " ", password: "testPasswordN", email: "test@mail.ru", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
+          { note: "Невалидный password=пустой", login: "testLoginN", password: "", email: "test@mail.ru", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
+          { note: "Невалидный password=пробел", login: "testLoginN", password: " ", email: "test@mail.ru", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
+          { note: "Невалидный email=пустой", login: "testLoginN", password: "testPasswordN", email: "", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
+          { note: "Невалидный email=пробел", login: "testLoginN", password: "testPasswordN", email: " ", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
+          { note: "Невалидный email=test", login: "testLoginN", password: "testPasswordN", email: "test", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
+          { note: "Невалидный email=mail.ru", login: "testLoginN", password: "testPasswordN", email: "mail.ru", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
+          { note: "Невалидный email=@.ru", login: "testLoginN", password: "testPasswordN", email: "@.ru", firstName: "Ivan", lastName: "Ivanov", secondName: "Ivanovich", cod: 400 },
+          { note: "Невалидный firstName = пустой", login: "testLoginN", password: "testPasswordN", email: "test@mail.ru", firstName: "", lastName: "Petrov", secondName: "Petrovich", cod: 400 },
+          { note: "Невалидный firstName = пробел", login: "testLoginN", password: "testPasswordN", email: "test@mail.ru", firstName: " ", lastName: "Petrov", secondName: "Petrovich", cod: 400 },
+          { note: "Невалидный lastName = пустой", login: "testLoginN", password: "testPasswordN", email: "test@mail.ru", firstName: "Ivan", lastName: "", secondName: "Petrovich", cod: 400 },
+          { note: "Невалидный lastName = пробел", login: "testLoginN", password: "testPasswordN", email: "test@mail.ru", firstName: "Ivan", lastName: " ", secondName: "Petrovich", cod: 400 }
         ];
 
-        console.log(`🚀 Start ${testData.length} negative datasets...`);
+        console.log(`🚀 Запуск ${testData.length} наборов негативных тестовых данных...`);
 
         let passed = 0;
         let failed = 0;
@@ -54,7 +56,7 @@ runtime:
           //const uniquePassword = data.password + suffix;
           //const uniqueEmail = suffix + data.email;
 
-          console.log(`\n📦 Dataset ${i + 1}/${testData.length} (${data.note}): login=${data.login}, email=${data.email}, firstName=${data.firstName}, lastName=${data.lastName}, secondName=${data.secondName}, expected status=${data.cod}`);
+          console.log(`\n📦 Набор ${i + 1}/${testData.length} (${data.note}): login=${data.login}, email=${data.email}, firstName=${data.firstName}, lastName=${data.lastName}, secondName=${data.secondName}, ожидаемый статус=${data.cod}`);
 
           const requestBody = {
             user: {
@@ -73,6 +75,7 @@ runtime:
           let userId = null;
           let requestError = null;
 
+          // --- Отправка запроса ---
           try {
             const res = await bru.sendRequest({
               method: 'POST',
@@ -81,25 +84,29 @@ runtime:
               data: requestBody,
               timeout: 10000
             });
+            // Сюда попадаем только при статусе 2xx
             actualStatus = res.status;
             userId = res.data?.payload?.user?.id;
           } catch (err) {
+            // Сюда попадаем при статусе 400+
             requestError = err;
             actualStatus = err.response?.status || err.status || null;
           }
 
+          // --- Проверка статуса (функция assertStatus объявлена вне цикла)---
           assertStatus(i + 1, data.cod, data.note, actualStatus);
 
           if (actualStatus === data.cod) {
-            console.log(`✅ Dataset ${i + 1}: passed — received status ${actualStatus}`);
+            console.log(`✅ Набор ${i + 1}: прошел — получен статус ${actualStatus}`);
             passed++;
           } else {
-            console.log(`❌ Dataset ${i + 1}: failed — expected status ${data.cod}, received status ${actualStatus}`);
+            console.log(`❌ Набор ${i + 1}: провален — ожидался статус ${data.cod}, получен статус ${actualStatus}`);
             failed++;
           }
 
+          // --- Очистка: если сервер ошибочно создал пользователя ---
           if (userId) {
-            console.log(`⚠️ Dataset ${i + 1}: wrong created user ID=${userId} is being deleted...`);
+            console.log(`⚠️ Набор ${i + 1}: ошибочно созданный пользователь ID=${userId} удаляется...`);
             try {
               const delRes = await bru.sendRequest({
                 method: 'DELETE',
@@ -107,21 +114,22 @@ runtime:
                 headers: { 'Content-Type': 'application/json' },
                 timeout: 5000
               });
-              console.log(`🧹 User ${userId} is deleted (status ${delRes.status}).`);
+              console.log(`🧹 Набор ${i + 1}: пользователь ${userId} удален (статус ${delRes.status}).`);
             } catch (err) {
               const delStatus = err.response?.status || err.status || 'unknown';
               if (delStatus === 404) {
-                console.log(`🧹 User ${userId} has already deleted (404).`);
+                console.log(`🧹 Набор ${i + 1}: пользователь ${userId} уже был удален (404).`);
               } else {
-                console.warn(`⚠️ User could not been deleted ${userId} (status ${delStatus}): ${err.message}`);
+                console.warn(`⚠️ Набор ${i + 1}: не удалось удалить пользователя ${userId} (статус ${delStatus}): ${err.message}`);
               }
             }
           }
         }
 
-        console.log(`\n${'='.repeat(50)}`);
-        console.log(`📊 Total: ${passed} passed, ${failed} failed from ${testData.length} datasets`);
-        console.log(`${'='.repeat(50)}`);
+        // --- Итог ---
+        console.log(`\n${'='.repeat(66)}`);
+        console.log(`📊 Итого: ${passed} прошло, ${failed} провалено из ${testData.length} наборов тестовых данных`);
+        console.log(`${'='.repeat(66)}`);
 
 settings:
   encodeUrl: true
