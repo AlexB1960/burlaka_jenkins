@@ -1,0 +1,166 @@
+info:
+  name: Регистрация_пользователя_400_existedLogin
+  type: http
+  seq: 28
+  tags:
+    - Пользователи
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/user?page=1&size=10"
+  params:
+    - name: page
+      value: "1"
+      type: query
+    - name: size
+      value: "10"
+      type: query
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const baseURL = bru.getEnvVar('baseUrl');
+
+        function assertStatus(expected, actual) {
+          test(`Registration with existing login: expected status ${expected}`, function() {
+            expect(actual).to.equal(expected);
+          });
+        }
+
+        if (res.status === 200) {
+          //const newId = res.data?.payload?.user?.id || res.data?.id || res.body?.payload?.user?.id;
+          //if (!newId) throw new Error('It was impossible to get ID from response');
+          const testLogin = res.data?.payload?.users[0]?.login || res.data?.login || res.body?.payload?.users[0]?.login;
+          if (!testLogin) throw new Error('It was impossible to get email from response');
+          
+          //bru.setVar('testByEmailUserId', newId);
+          bru.setVar('testUserLogin', testLogin);
+        } else {
+          throw new Error(`Error when receiving user list: status ${res.status}`);
+        }
+
+        const userLogin = bru.getVar('testUserLogin');
+        const requestBody = {
+          user: {
+            login: userLogin,
+            password: "testpassword400login",
+            email: "testemail400logon",
+            fio: {
+              firstName: "firstName",
+              lastName: "lastName",
+              secondName: "secondName"
+            }
+          }
+        };
+
+        let actualStatus = null;
+        let userId = null;
+        let requestError = null;
+
+        try {
+          const res = await bru.sendRequest({
+            method: 'POST',
+            url: `${baseURL}/api/user/register`,
+            headers: { 'Content-Type': 'application/json' },
+            data: requestBody,
+            timeout: 10000
+          });
+          actualStatus = res.status;
+          userId = res.data?.payload?.user?.id;
+        } catch (err) {
+          requestError = err;
+          actualStatus = err.response?.status || err.status || null;
+        }
+
+        assertStatus(400, actualStatus);
+
+        if (actualStatus === 400) {
+          console.log(`✅ Test (registration with existing login) passed — received status ${actualStatus}`);
+        } else {
+          console.log(`❌ Test (registration with existing login) failed — expected status 400, received status ${actualStatus}`);
+        }
+
+        if (userId) {
+          console.log(`⚠️ Wrong created user ID=${userId} is being deleted...`);
+          try {
+            const delRes = await bru.sendRequest({
+              method: 'DELETE',
+              url: `${baseURL}/api/user/${userId}`,
+              headers: { 'Content-Type': 'application/json' },
+              timeout: 5000
+            });
+            console.log(`🧹 User ${userId} is deleted (status ${delRes.status}).`);
+          } catch (err) {
+            const delStatus = err.response?.status || err.status || 'unknown';
+            if (delStatus === 404) {
+              console.log(`🧹 User ${userId} has already been deleted (404).`);
+            } else {
+              console.warn(`⚠️ User could not been deleted ${userId} (status ${delStatus}): ${err.message}`);
+            }
+          }
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: 200 Response
+    description: OK
+    request:
+      url: "{{baseUrl}}/api/user"
+      method: GET
+      params:
+        - name: page
+          value: "1"
+          type: query
+        - name: size
+          value: "10"
+          type: query
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: "*/*"
+      body:
+        type: text
+        data: |-
+          {
+            "message": "",
+            "status": "OK",
+            "payload": {
+              "page": 0,
+              "pageCount": 0,
+              "countOnPage": 0,
+              "users": [
+                {
+                  "id": "",
+                  "login": "",
+                  "email": "",
+                  "fio": {
+                    "firstName": "",
+                    "lastName": "",
+                    "secondName": ""
+                  }
+                }
+              ]
+            }
+          }
+
+docs: |
+  Возвращает пользователей постранично. Удалённые пользователи в выборку не попадают.
+
+  Параметры запроса:
+  - page — номер страницы, нумерация с 1 (по умолчанию 1).
+  - size — количество пользователей на странице (по умолчанию 10).
+
+  Ответы:
+  - 200 — страница пользователей: в payload список users, номер запрошенной страницы page,
+  общее количество страниц pageCount и размер страницы countOnPage.
+  - 400 — page меньше 1.

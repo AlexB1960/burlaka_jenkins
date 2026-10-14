@@ -18,7 +18,6 @@ runtime:
   scripts:
     - type: before-request
       code: |-
-        // Создание нового тестового пользователя с testUserLogin
         const baseURL = bru.getEnvVar('baseUrl');
 
         const suffix = Math.random().toString(36).substring(2, 8);
@@ -45,14 +44,14 @@ runtime:
 
         if (resNew.status === 201) {
           const newId = resNew.data?.payload?.user?.id || resNew.data?.id || resNew.body?.payload?.user?.id;
-          if (!newId) throw new Error('Невозможно извлечь ID из полученного response');
+          if (!newId) throw new Error('It was impossible to get ID from response');
           const newLogin = resNew.data?.payload?.user?.login || resNew.data?.login || resNew.body?.payload?.user?.login;
-          if (!newLogin) throw new Error('Невозможно извлечь Login из полученного response');
+          if (!newLogin) throw new Error('It was impossible to get Login from response');
           
           bru.setVar('testByLoginUserId', newId);
           bru.setVar('testUserLogin', newLogin);
         } else {
-          throw new Error(`Ошибка создания тестового пользователя: статус ${resNew.status}`);
+          throw new Error(`Error creating user: status ${resNew.status}`);
         }
     - type: tests
       code: |-
@@ -78,12 +77,12 @@ runtime:
           expect(fio.secondName).to.equal("testSecondname_ByLogin");
         });
 
-        // Удаление тестового пользователя
+
         const baseURL = bru.getEnvVar('baseUrl');
         const userId = bru.getVar('testByLoginUserId');
 
         if (!userId) {
-          console.log('⚠️ Post-response: Не найден testUserId. Возможно, что не сработал Pre-request.');
+          console.log('⚠️ Post-response: testUserId is not found. Perhaps the Pre-request didn’t work.');
           return;
         }
 
@@ -99,12 +98,12 @@ runtime:
             bru.deleteVar('testByLoginUserId');
             bru.deleteVar('testUserLogin');
           } else if (deleteRes.status === 404) {
-            console.warn(`⚠️ Пользователь ${userId} не найден (Возможно, он был удален раньше).`);
+            console.warn(`⚠️ User ${userId} is not found (It may have been deleted earlier).`);
           } else {
-            console.warn(`⚠️ Сервер вернул статус ${deleteRes.status} при удалении.`);
+            console.warn(`⚠️ Server returns the status ${deleteRes.status} when removing.`);
           }
         } catch (err) {
-          console.error(`💥 Критическая ошибка при удалении: ${err.message}`);
+          console.error(`💥 Critical error during deletion: ${err.message}`);
         }
 
 settings:
